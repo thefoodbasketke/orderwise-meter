@@ -16,6 +16,10 @@ interface Order {
   created_at: string;
   products: { name: string };
   profiles: { full_name: string; phone_number: string };
+  payments?: Array<{
+    status: string;
+    mpesa_receipt_number: string | null;
+  }>;
 }
 
 export default function AdminOrders() {
@@ -31,7 +35,11 @@ export default function AdminOrders() {
     try {
       const { data, error } = await supabase
         .from("orders")
-        .select("*, products(name)")
+        .select(`
+          *,
+          products(name),
+          payments(status, mpesa_receipt_number)
+        `)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
@@ -107,8 +115,25 @@ export default function AdminOrders() {
                         <p className="font-semibold">KSh {order.total_price.toLocaleString()}</p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-4">
-                      <span className="text-sm text-muted-foreground">Status:</span>
+                    
+                    {order.payments && order.payments.length > 0 && (
+                      <div className="border-t pt-3">
+                        <div className="flex items-center gap-2 text-sm">
+                          <span className="text-muted-foreground">Payment Status:</span>
+                          <Badge variant={order.payments[0].status === "success" ? "default" : "secondary"}>
+                            {order.payments[0].status}
+                          </Badge>
+                          {order.payments[0].mpesa_receipt_number && (
+                            <span className="text-xs text-muted-foreground ml-2">
+                              Receipt: {order.payments[0].mpesa_receipt_number}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="flex items-center gap-4 border-t pt-3">
+                      <span className="text-sm text-muted-foreground">Order Status:</span>
                       <Select value={order.status} onValueChange={(value) => updateStatus(order.id, value)}>
                         <SelectTrigger className="w-48">
                           <SelectValue />

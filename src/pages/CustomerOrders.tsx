@@ -5,8 +5,11 @@ import { Navbar } from "@/components/Navbar";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Package } from "lucide-react";
+import { Package, CreditCard } from "lucide-react";
 
 interface Order {
   id: string;
@@ -20,6 +23,11 @@ interface Order {
     name: string;
     image_url: string;
   };
+  payments?: Array<{
+    id: string;
+    status: string;
+    mpesa_receipt_number: string | null;
+  }>;
 }
 
 const statusColors: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
@@ -32,9 +40,11 @@ const statusColors: Record<string, "default" | "secondary" | "destructive" | "ou
 
 export default function CustomerOrders() {
   const { user } = useAuth();
+  const { toast } = useToast();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
-  const { toast } = useToast();
+  const [paymentLoading, setPaymentLoading] = useState<string | null>(null);
+  const [phoneNumbers, setPhoneNumbers] = useState<Record<string, string>>({});
 
   useEffect(() => {
     if (user) {
@@ -46,7 +56,11 @@ export default function CustomerOrders() {
     try {
       const { data, error } = await supabase
         .from("orders")
-        .select("*, products(name, image_url)")
+        .select(`
+          *,
+          products(name, image_url),
+          payments(id, status, mpesa_receipt_number)
+        `)
         .eq("customer_id", user?.id)
         .order("created_at", { ascending: false });
 
@@ -61,6 +75,62 @@ export default function CustomerOrders() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handlePayment = async (orderId: string, amount: number) => {
+    const phone = phoneNumbers[orderId];
+    if (!phone || phone.trim() === "") {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Please enter your phone number",
+      });
+      return;
+    }
+
+    setPaymentLoading(orderId);
+    try {
+      const { data, error } = await supabase.functions.invoke("initiate-payment", {
+        body: {
+          orderId,
+          phone,
+          amount,
+        },
+      });
+
+      if (error) throw error;
+
+      if (data.success) {
+        toast({
+          title: "Payment Initiated",
+          description: data.message || "Check your phone to complete payment",
+        });
+        fetchOrders();
+      } else {
+        throw new Error(data.error || "Payment failed");
+      }
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Payment Error",
+        description: error.message || "Failed to initiate payment",
+      });
+    } finally {
+      setPaymentLoading(null);
+    }
+  };
+
+  const getPaymentStatus = (order: Order) => {
+    if (!order.payments || order.payments.length === 0) {
+      return { status: "unpaid", label: "Unpaid", variant: "destructive" as const };
+    }
+    const latestPayment = order.payments[0];
+    if (latestPayment.status === "success") {
+      return { status: "paid", label: "Paid", variant: "default" as const };
+    } else if (latestPayment.status === "pending") {
+      return { status: "pending", label: "Pending", variant: "secondary" as const };
+    }
+    return { status: "failed", label: "Failed", variant: "destructive" as const };
   };
 
   return (
@@ -86,47 +156,99 @@ export default function CustomerOrders() {
             </Card>
           ) : (
             <div className="space-y-4">
-              {orders.map((order) => (
-                <Card key={order.id} className="hover:shadow-hover transition-shadow">
-                  <CardHeader>
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <CardTitle className="text-lg">{order.products.name}</CardTitle>
-                        <p className="text-sm text-muted-foreground">
-                          Order ID: {order.id.slice(0, 8)}...
-                        </p>
+              {orders.map((order) => {
+                const paymentStatus = getPaymentStatus(order);
+                const needsPayment = paymentStatus.status === "unpaid" || paymentStatus.status === "failed";
+                
+                return (
+                  <Card key={order.id} className="hover:shadow-hover transition-shadow">
+                    <CardHeader>
+                      <div className="flex items-start justify-between flex-wrap gap-2">
+                        <div>
+                          <CardTitle className="text-lg">{order.products.name}</CardTitle>
+                          <p className="text-sm text-muted-foreground">
+                            Order ID: {order.id.slice(0, 8)}...
+                          </p>
+                        </div>
+                        <div className="flex gap-2">
+                          <Badge variant={statusColors[order.status] || "default"}>
+                            {order.status}
+                          </Badge>
+                          <Badge variant={paymentStatus.variant}>
+                            {paymentStatus.label}
+                          </Badge>
+                        </div>
                       </div>
-                      <Badge variant={statusColors[order.status] || "default"}>
-                        {order.status}
-                      </Badge>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                      <div>
-                        <p className="text-sm text-muted-foreground">Quantity</p>
-                        <p className="font-semibold">{order.quantity}</p>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div>
+                          <p className="text-sm text-muted-foreground">Quantity</p>
+                          <p className="font-semibold">{order.quantity}</p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-muted-foreground">Unit Price</p>
+                          <p className="font-semibold">KSh {order.unit_price.toLocaleString()}</p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-muted-foreground">Total Price</p>
+                          <p className="font-semibold text-primary">
+                            KSh {order.total_price.toLocaleString()}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-muted-foreground">Order Date</p>
+                          <p className="font-semibold">
+                            {new Date(order.created_at).toLocaleDateString()}
+                          </p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="text-sm text-muted-foreground">Unit Price</p>
-                        <p className="font-semibold">KSh {order.unit_price.toLocaleString()}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-muted-foreground">Total Price</p>
-                        <p className="font-semibold text-primary">
-                          KSh {order.total_price.toLocaleString()}
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-muted-foreground">Order Date</p>
-                        <p className="font-semibold">
-                          {new Date(order.created_at).toLocaleDateString()}
-                        </p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+
+                      {order.payments && order.payments[0]?.mpesa_receipt_number && (
+                        <div className="pt-2 border-t">
+                          <p className="text-xs text-muted-foreground">
+                            M-Pesa Receipt: {order.payments[0].mpesa_receipt_number}
+                          </p>
+                        </div>
+                      )}
+
+                      {needsPayment && (
+                        <div className="border-t pt-4">
+                          <Label htmlFor={`phone-${order.id}`} className="text-sm font-medium">
+                            M-Pesa Phone Number
+                          </Label>
+                          <div className="flex gap-2 mt-2">
+                            <Input
+                              id={`phone-${order.id}`}
+                              type="tel"
+                              placeholder="0712345678 or +254712345678"
+                              value={phoneNumbers[order.id] || ""}
+                              onChange={(e) =>
+                                setPhoneNumbers({
+                                  ...phoneNumbers,
+                                  [order.id]: e.target.value,
+                                })
+                              }
+                              disabled={paymentLoading === order.id}
+                            />
+                            <Button
+                              onClick={() => handlePayment(order.id, order.total_price)}
+                              disabled={paymentLoading === order.id}
+                              className="whitespace-nowrap"
+                            >
+                              <CreditCard className="mr-2 h-4 w-4" />
+                              {paymentLoading === order.id ? "Processing..." : "Pay Now"}
+                            </Button>
+                          </div>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            Enter your Safaricom number to receive the STK push prompt
+                          </p>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                );
+              })}
             </div>
           )}
         </div>
