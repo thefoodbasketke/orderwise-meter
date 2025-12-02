@@ -2,78 +2,76 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+/* UMS Metering Solutions - Corporate Blue Theme */
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 200 20% 10%;
+    --background: 210 20% 98%;
+    --foreground: 210 40% 15%;
 
     --card: 0 0% 100%;
-    --card-foreground: 200 20% 10%;
+    --card-foreground: 210 40% 15%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 200 20% 10%;
+    --popover-foreground: 210 40% 15%;
 
-    --primary: 185 85% 25%;
+    --primary: 210 85% 40%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 185 20% 92%;
-    --secondary-foreground: 185 85% 25%;
+    --secondary: 210 25% 93%;
+    --secondary-foreground: 210 85% 40%;
 
-    --muted: 185 15% 95%;
-    --muted-foreground: 200 15% 45%;
+    --muted: 210 15% 95%;
+    --muted-foreground: 210 15% 45%;
 
-    --accent: 25 95% 55%;
+    --accent: 210 100% 50%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 185 20% 88%;
-    --input: 185 20% 88%;
-    --ring: 185 85% 25%;
+    --border: 210 20% 88%;
+    --input: 210 20% 88%;
+    --ring: 210 85% 40%;
 
     --radius: 0.75rem;
 
-    --gradient-hero: linear-gradient(135deg, hsl(185, 85%, 25%) 0%, hsl(185, 70%, 35%) 100%);
-    --gradient-accent: linear-gradient(135deg, hsl(25, 95%, 55%) 0%, hsl(35, 95%, 60%) 100%);
-    --shadow-card: 0 4px 6px -1px hsl(185 85% 25% / 0.08), 0 2px 4px -2px hsl(185 85% 25% / 0.08);
-    --shadow-hover: 0 10px 15px -3px hsl(185 85% 25% / 0.12), 0 4px 6px -4px hsl(185 85% 25% / 0.12);
+    --gradient-hero: linear-gradient(135deg, hsl(210, 85%, 40%) 0%, hsl(210, 70%, 50%) 100%);
+    --gradient-accent: linear-gradient(135deg, hsl(210, 100%, 50%) 0%, hsl(200, 100%, 45%) 100%);
+    --shadow-card: 0 4px 6px -1px hsl(210 85% 40% / 0.08), 0 2px 4px -2px hsl(210 85% 40% / 0.08);
+    --shadow-hover: 0 10px 15px -3px hsl(210 85% 40% / 0.12), 0 4px 6px -4px hsl(210 85% 40% / 0.12);
     
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .dark {
-    --background: 200 25% 8%;
+    --background: 210 30% 8%;
     --foreground: 0 0% 95%;
 
-    --card: 200 20% 12%;
+    --card: 210 25% 12%;
     --card-foreground: 0 0% 95%;
 
-    --popover: 200 20% 12%;
+    --popover: 210 25% 12%;
     --popover-foreground: 0 0% 95%;
 
-    --primary: 185 85% 45%;
+    --primary: 210 85% 55%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 200 20% 18%;
-    --secondary-foreground: 185 85% 45%;
+    --secondary: 210 25% 18%;
+    --secondary-foreground: 210 85% 55%;
 
-    --muted: 200 20% 15%;
-    --muted-foreground: 200 10% 60%;
+    --muted: 210 20% 15%;
+    --muted-foreground: 210 10% 60%;
 
-    --accent: 25 95% 55%;
+    --accent: 210 100% 60%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 200 20% 20%;
-    --input: 200 20% 20%;
-    --ring: 185 85% 45%;
+    --border: 210 20% 20%;
+    --input: 210 20% 20%;
+    --ring: 210 85% 55%;
   }
 }
 

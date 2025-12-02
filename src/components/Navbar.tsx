@@ -8,6 +8,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import umsLogo from "@/assets/ums-logo.png";
 
 export function Navbar() {
   const { user, isAdmin, signOut } = useAuth();
@@ -17,8 +18,7 @@ export function Navbar() {
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
           <Link to="/" className="flex items-center space-x-2">
-            <div className="h-8 w-8 rounded bg-gradient-hero"></div>
-            <span className="font-semibold text-lg">UMS Meters</span>
+            <img src={umsLogo} alt="UMS Prepaid" className="h-10 w-auto" />
           </Link>
 
           <div className="flex items-center space-x-4">
