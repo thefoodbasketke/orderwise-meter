@@ -5,7 +5,10 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { Download } from "lucide-react";
+import { format } from "date-fns";
 
 interface Order {
   id: string;
@@ -79,12 +82,70 @@ export default function AdminOrders() {
     }
   };
 
+  const exportToCSV = () => {
+    if (orders.length === 0) {
+      toast({ variant: "destructive", title: "No data", description: "No orders to export" });
+      return;
+    }
+
+    const headers = [
+      "Order ID",
+      "Date",
+      "Customer Name",
+      "Phone Number",
+      "Product",
+      "Quantity",
+      "Unit Price (KSh)",
+      "Total Price (KSh)",
+      "Order Status",
+      "Payment Status",
+      "M-Pesa Receipt"
+    ];
+
+    const rows = orders.map(order => [
+      order.id,
+      format(new Date(order.created_at), "yyyy-MM-dd HH:mm"),
+      order.profiles?.full_name || "N/A",
+      order.profiles?.phone_number || "N/A",
+      order.products?.name || "N/A",
+      order.quantity,
+      (order.total_price / order.quantity).toFixed(2),
+      order.total_price.toFixed(2),
+      order.status,
+      order.payments?.[0]?.status || "unpaid",
+      order.payments?.[0]?.mpesa_receipt_number || ""
+    ]);
+
+    const csvContent = [
+      headers.join(","),
+      ...rows.map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(","))
+    ].join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", `orders-${format(new Date(), "yyyy-MM-dd")}.csv`);
+    link.style.visibility = "hidden";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    toast({ title: "Success", description: "Orders exported successfully" });
+  };
+
   return (
     <ProtectedRoute requireAdmin>
       <div className="min-h-screen bg-background">
         <Navbar />
         <div className="container mx-auto px-4 py-8">
-          <h1 className="text-3xl font-bold mb-6">Orders Management</h1>
+          <div className="flex justify-between items-center mb-6">
+            <h1 className="text-3xl font-bold">Orders Management</h1>
+            <Button onClick={exportToCSV} variant="outline" disabled={orders.length === 0}>
+              <Download className="mr-2 h-4 w-4" />
+              Export CSV
+            </Button>
+          </div>
           {loading ? (
             <div className="text-center py-12">
               <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent mx-auto mb-4"></div>
