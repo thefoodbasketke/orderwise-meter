@@ -90,6 +90,18 @@ export default function CustomerOrders() {
 
     setPaymentLoading(orderId);
     try {
+      // Get fresh session to ensure token is valid
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError || !session) {
+        toast({
+          variant: "destructive",
+          title: "Session Expired",
+          description: "Please log in again to continue",
+        });
+        return;
+      }
+
       const { data, error } = await supabase.functions.invoke("initiate-payment", {
         body: {
           orderId,

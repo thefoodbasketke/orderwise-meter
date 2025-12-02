@@ -34,6 +34,10 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
+    // Extract the JWT token from the Authorization header
+    const token = authHeader.replace("Bearer ", "");
+    console.log("Token length:", token.length);
+
     const supabaseClient = createClient(
       supabaseUrl ?? "",
       supabaseAnonKey ?? "",
@@ -44,7 +48,8 @@ const handler = async (req: Request): Promise<Response> => {
       }
     );
 
-    const { data: { user }, error: authError } = await supabaseClient.auth.getUser();
+    // Use getUser with the token directly
+    const { data: { user }, error: authError } = await supabaseClient.auth.getUser(token);
 
     console.log("User ID:", user?.id);
     console.log("Auth error:", authError?.message);
