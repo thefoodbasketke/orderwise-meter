@@ -19,27 +19,54 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
+    const supabaseUrl = Deno.env.get("SUPABASE_URL");
+    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY");
+    const authHeader = req.headers.get("Authorization");
+
+    console.log("Supabase URL present:", !!supabaseUrl);
+    console.log("Supabase Anon Key present:", !!supabaseAnonKey);
+    console.log("Auth header present:", !!authHeader);
+
+    if (!authHeader) {
+      return new Response(
+        JSON.stringify({ success: false, error: "Missing authorization header" }),
+        { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
+    }
+
     const supabaseClient = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_ANON_KEY") ?? "",
+      supabaseUrl ?? "",
+      supabaseAnonKey ?? "",
       {
         global: {
-          headers: { Authorization: req.headers.get("Authorization")! },
+          headers: { Authorization: authHeader },
         },
       }
     );
 
-    const {
-      data: { user },
-    } = await supabaseClient.auth.getUser();
+    const { data: { user }, error: authError } = await supabaseClient.auth.getUser();
+
+    console.log("User ID:", user?.id);
+    console.log("Auth error:", authError?.message);
+
+    if (authError) {
+      console.error("Auth error details:", JSON.stringify(authError));
+      return new Response(
+        JSON.stringify({ success: false, error: `Authentication failed: ${authError.message}` }),
+        { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
+    }
 
     if (!user) {
-      throw new Error("Unauthorized");
+      return new Response(
+        JSON.stringify({ success: false, error: "User not found in session" }),
+        { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
     }
 
     const { orderId, phone, amount }: PaymentRequest = await req.json();
 
-    console.log("Initiating payment:", { orderId, phone, amount });
+    console.log("Initiating payment:", { orderId, phone, amount, userId: user.id });
 
     // Validate order belongs to user
     const { data: order, error: orderError } = await supabaseClient
@@ -49,8 +76,12 @@ const handler = async (req: Request): Promise<Response> => {
       .eq("customer_id", user.id)
       .single();
 
-    if (orderError || !order) {
-      throw new Error("Order not found or unauthorized");
+    if (orderError) {
+      console.error("Order fetch error:", orderError);
+      return new Response(
+        JSON.stringify({ success: false, error: "Order not found or unauthorized" }),
+        { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
     }
 
     // Format phone number
@@ -64,12 +95,15 @@ const handler = async (req: Request): Promise<Response> => {
     console.log("Formatted phone:", formattedPhone);
 
     // Initiate STK push via Lipana API
+    const lipanaApiKey = Deno.env.get("LIPANA_API_KEY");
+    console.log("Lipana API Key present:", !!lipanaApiKey);
+
     const lipanaResponse = await fetch(
       "https://api.lipana.dev/v1/transactions/push-stk",
       {
         method: "POST",
         headers: {
-          "x-api-key": Deno.env.get("LIPANA_API_KEY") ?? "",
+          "x-api-key": lipanaApiKey ?? "",
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
@@ -80,7 +114,7 @@ const handler = async (req: Request): Promise<Response> => {
     );
 
     const lipanaData = await lipanaResponse.json();
-    console.log("Lipana response:", lipanaData);
+    console.log("Lipana response:", JSON.stringify(lipanaData));
 
     if (!lipanaResponse.ok) {
       throw new Error(lipanaData.message || "Failed to initiate payment");
