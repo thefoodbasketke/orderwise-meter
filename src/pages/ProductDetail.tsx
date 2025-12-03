@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
-import { Package, MessageSquare, ShoppingCart, ArrowLeft } from "lucide-react";
+import { Package, MessageSquare, ShoppingCart, ArrowLeft, FileText, Download } from "lucide-react";
 import { z } from "zod";
 
 interface Product {
@@ -21,6 +21,8 @@ interface Product {
   image_url: string;
   stock: number;
   category: string;
+  specifications: string | null;
+  catalogue_pdf_url: string | null;
 }
 
 const orderSchema = z.object({
@@ -266,6 +268,32 @@ export default function ProductDetail() {
               )}
             </div>
             <p className="text-muted-foreground mb-6">{product.description}</p>
+
+            {product.specifications && (
+              <div className="mb-6">
+                <h3 className="font-semibold mb-2 flex items-center gap-2">
+                  <FileText className="h-4 w-4" />
+                  Specifications
+                </h3>
+                <div className="bg-muted p-4 rounded-lg text-sm whitespace-pre-wrap">
+                  {product.specifications}
+                </div>
+              </div>
+            )}
+
+            {product.catalogue_pdf_url && (
+              <div className="mb-6">
+                <a
+                  href={product.catalogue_pdf_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 text-primary hover:underline"
+                >
+                  <Download className="h-4 w-4" />
+                  Download Product Catalogue (PDF)
+                </a>
+              </div>
+            )}
 
             {!user ? (
               <Card>

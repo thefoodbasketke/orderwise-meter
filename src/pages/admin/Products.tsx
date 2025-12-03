@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Plus, Edit, Trash, Upload, ImageIcon } from "lucide-react";
+import { Plus, Edit, Trash, Upload, ImageIcon, FileText } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { z } from "zod";
 
@@ -21,6 +21,8 @@ interface Product {
   image_url: string;
   stock: number;
   category: string;
+  specifications: string | null;
+  catalogue_pdf_url: string | null;
 }
 
 const productSchema = z.object({
@@ -29,6 +31,7 @@ const productSchema = z.object({
   basePrice: z.number().min(0.01, "Price must be greater than 0"),
   stock: z.number().min(0, "Stock cannot be negative"),
   category: z.string().max(50),
+  specifications: z.string().max(2000).optional(),
 });
 
 export default function AdminProducts() {
@@ -39,7 +42,10 @@ export default function AdminProducts() {
   const [uploading, setUploading] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
+  const [pdfFile, setPdfFile] = useState<File | null>(null);
+  const [pdfName, setPdfName] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const pdfInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -49,10 +55,13 @@ export default function AdminProducts() {
   useEffect(() => {
     if (editingProduct) {
       setImagePreview(editingProduct.image_url || null);
+      setPdfName(editingProduct.catalogue_pdf_url ? "Current PDF" : null);
     } else {
       setImagePreview(null);
+      setPdfName(null);
     }
     setImageFile(null);
+    setPdfFile(null);
   }, [editingProduct, dialogOpen]);
 
   const fetchProducts = async () => {
@@ -101,6 +110,52 @@ export default function AdminProducts() {
     setImagePreview(URL.createObjectURL(file));
   };
 
+  const handlePdfSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.type !== "application/pdf") {
+      toast({
+        variant: "destructive",
+        title: "Invalid file",
+        description: "Please select a PDF file",
+      });
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      toast({
+        variant: "destructive",
+        title: "File too large",
+        description: "PDF must be less than 10MB",
+      });
+      return;
+    }
+
+    setPdfFile(file);
+    setPdfName(file.name);
+  };
+
+  const uploadPdf = async (file: File): Promise<string | null> => {
+    const fileName = `${crypto.randomUUID()}.pdf`;
+    const filePath = `catalogues/${fileName}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from("product-images")
+      .upload(filePath, file);
+
+    if (uploadError) {
+      console.error("PDF upload error:", uploadError);
+      throw new Error("Failed to upload PDF");
+    }
+
+    const { data: { publicUrl } } = supabase.storage
+      .from("product-images")
+      .getPublicUrl(filePath);
+
+    return publicUrl;
+  };
+
   const uploadImage = async (file: File): Promise<string | null> => {
     const fileExt = file.name.split(".").pop();
     const fileName = `${crypto.randomUUID()}.${fileExt}`;
@@ -135,14 +190,20 @@ export default function AdminProducts() {
         basePrice: parseFloat(formData.get("basePrice") as string),
         stock: parseInt(formData.get("stock") as string),
         category: formData.get("category") as string,
+        specifications: formData.get("specifications") as string || "",
       };
 
       productSchema.parse(data);
 
       let imageUrl = editingProduct?.image_url || null;
+      let pdfUrl = editingProduct?.catalogue_pdf_url || null;
       
       if (imageFile) {
         imageUrl = await uploadImage(imageFile);
+      }
+
+      if (pdfFile) {
+        pdfUrl = await uploadPdf(pdfFile);
       }
 
       const productData = {
@@ -152,6 +213,8 @@ export default function AdminProducts() {
         image_url: imageUrl,
         stock: data.stock,
         category: data.category,
+        specifications: data.specifications || null,
+        catalogue_pdf_url: pdfUrl,
       };
 
       if (editingProduct) {
@@ -175,6 +238,8 @@ export default function AdminProducts() {
       setEditingProduct(null);
       setImageFile(null);
       setImagePreview(null);
+      setPdfFile(null);
+      setPdfName(null);
       fetchProducts();
     } catch (error: any) {
       if (error instanceof z.ZodError) {
@@ -230,6 +295,8 @@ export default function AdminProducts() {
                 setEditingProduct(null);
                 setImageFile(null);
                 setImagePreview(null);
+                setPdfFile(null);
+                setPdfName(null);
               }
             }}>
               <DialogTrigger asChild>
@@ -293,6 +360,16 @@ export default function AdminProducts() {
                     />
                   </div>
                   <div>
+                    <Label htmlFor="specifications">Specifications</Label>
+                    <Textarea
+                      id="specifications"
+                      name="specifications"
+                      defaultValue={editingProduct?.specifications || ""}
+                      rows={4}
+                      placeholder="Enter product specifications..."
+                    />
+                  </div>
+                  <div>
                     <Label>Product Image</Label>
                     <input
                       ref={fileInputRef}
@@ -321,6 +398,34 @@ export default function AdminProducts() {
                           <Upload className="h-8 w-8 mb-2" />
                           <p className="text-sm">Click to upload image</p>
                           <p className="text-xs">PNG, JPG up to 5MB</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <div>
+                    <Label>Product Catalogue (PDF)</Label>
+                    <input
+                      ref={pdfInputRef}
+                      type="file"
+                      accept="application/pdf"
+                      onChange={handlePdfSelect}
+                      className="hidden"
+                    />
+                    <div 
+                      onClick={() => pdfInputRef.current?.click()}
+                      className="mt-2 border-2 border-dashed border-border rounded-lg p-4 cursor-pointer hover:border-primary transition-colors"
+                    >
+                      {pdfName ? (
+                        <div className="flex items-center gap-2 text-sm">
+                          <FileText className="h-5 w-5 text-primary" />
+                          <span className="truncate">{pdfName}</span>
+                          <span className="text-xs text-muted-foreground">(Click to change)</span>
+                        </div>
+                      ) : (
+                        <div className="flex flex-col items-center justify-center py-2 text-muted-foreground">
+                          <FileText className="h-6 w-6 mb-1" />
+                          <p className="text-sm">Click to upload PDF</p>
+                          <p className="text-xs">Max 10MB</p>
                         </div>
                       )}
                     </div>
