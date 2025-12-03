@@ -84,9 +84,23 @@ export default function Negotiations() {
     const formData = new FormData(e.currentTarget);
     
     try {
+      const customerName = formData.get("customerName") as string;
+      const phoneNumber = formData.get("phoneNumber") as string;
+      const email = formData.get("email") as string || "";
+      const alternativePhone = formData.get("alternativePhone") as string || "";
+      const county = formData.get("county") as string;
+      const town = formData.get("town") as string;
+      const buildingName = formData.get("buildingName") as string || "";
+      const floorUnit = formData.get("floorUnit") as string || "";
       const addressText = formData.get("addressText") as string;
       const locationNotes = formData.get("locationNotes") as string || "";
 
+      if (!customerName || customerName.length < 2) {
+        throw new Error("Please enter your full name");
+      }
+      if (!phoneNumber || phoneNumber.length < 10) {
+        throw new Error("Please enter a valid phone number");
+      }
       if (addressText.length < 10) {
         throw new Error("Please provide a detailed delivery address");
       }
@@ -117,13 +131,21 @@ export default function Negotiations() {
         .update({ order_id: order.id })
         .eq("id", selectedNegotiation.id);
 
-      // Create delivery location
+      // Create delivery location with all customer details
       const { error: locationError } = await supabase
         .from("delivery_locations")
         .insert({
           order_id: order.id,
           address_text: addressText,
           location_notes: locationNotes,
+          customer_name: customerName,
+          phone_number: phoneNumber,
+          email: email || null,
+          alternative_phone: alternativePhone || null,
+          county: county,
+          town: town,
+          building_name: buildingName || null,
+          floor_unit: floorUnit || null,
         });
 
       if (locationError) throw locationError;
@@ -245,7 +267,7 @@ export default function Negotiations() {
 
           {/* Order Dialog for Accepted Negotiations */}
           <Dialog open={orderDialogOpen} onOpenChange={setOrderDialogOpen}>
-            <DialogContent>
+            <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>Place Order with Negotiated Price</DialogTitle>
               </DialogHeader>
@@ -277,23 +299,66 @@ export default function Negotiations() {
                     </p>
                   </div>
 
-                  <div>
-                    <Label htmlFor="addressText">Delivery Address</Label>
-                    <Textarea
-                      id="addressText"
-                      name="addressText"
-                      placeholder="Enter full delivery address..."
-                      rows={3}
-                      required
-                    />
+                  <div className="border-t pt-4">
+                    <h4 className="font-medium mb-3 text-sm">Customer Details</h4>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <Label htmlFor="customerName" className="text-xs">Full Name *</Label>
+                        <Input id="customerName" name="customerName" placeholder="Your full name" required />
+                      </div>
+                      <div>
+                        <Label htmlFor="phoneNumber" className="text-xs">Phone Number *</Label>
+                        <Input id="phoneNumber" name="phoneNumber" type="tel" placeholder="0712345678" required />
+                      </div>
+                      <div>
+                        <Label htmlFor="email" className="text-xs">Email</Label>
+                        <Input id="email" name="email" type="email" placeholder="your@email.com" />
+                      </div>
+                      <div>
+                        <Label htmlFor="alternativePhone" className="text-xs">Alt. Phone</Label>
+                        <Input id="alternativePhone" name="alternativePhone" type="tel" placeholder="Optional" />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="border-t pt-4">
+                    <h4 className="font-medium mb-3 text-sm">Delivery Location</h4>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <Label htmlFor="county" className="text-xs">County *</Label>
+                        <Input id="county" name="county" placeholder="e.g., Nairobi" required />
+                      </div>
+                      <div>
+                        <Label htmlFor="town" className="text-xs">Town/Area *</Label>
+                        <Input id="town" name="town" placeholder="e.g., Westlands" required />
+                      </div>
+                      <div>
+                        <Label htmlFor="buildingName" className="text-xs">Building/Estate</Label>
+                        <Input id="buildingName" name="buildingName" placeholder="Building name" />
+                      </div>
+                      <div>
+                        <Label htmlFor="floorUnit" className="text-xs">Floor/Unit</Label>
+                        <Input id="floorUnit" name="floorUnit" placeholder="e.g., 3rd Floor" />
+                      </div>
+                    </div>
+                    <div className="mt-3">
+                      <Label htmlFor="addressText" className="text-xs">Full Address *</Label>
+                      <Textarea
+                        id="addressText"
+                        name="addressText"
+                        placeholder="Enter detailed delivery address..."
+                        rows={2}
+                        required
+                      />
+                    </div>
                   </div>
 
                   <div>
-                    <Label htmlFor="locationNotes">Additional Notes (Optional)</Label>
+                    <Label htmlFor="locationNotes" className="text-xs">Special Instructions</Label>
                     <Textarea
                       id="locationNotes"
                       name="locationNotes"
-                      placeholder="Any special instructions..."
+                      placeholder="Any special delivery instructions..."
                       rows={2}
                     />
                   </div>

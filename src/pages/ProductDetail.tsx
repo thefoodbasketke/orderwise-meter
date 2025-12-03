@@ -27,6 +27,14 @@ interface Product {
 
 const orderSchema = z.object({
   quantity: z.number().min(1, "Quantity must be at least 1"),
+  customerName: z.string().min(2, "Please enter your full name"),
+  phoneNumber: z.string().min(10, "Please enter a valid phone number"),
+  email: z.string().email().optional().or(z.literal("")),
+  alternativePhone: z.string().optional(),
+  county: z.string().min(2, "Please enter your county"),
+  town: z.string().min(2, "Please enter your town/area"),
+  buildingName: z.string().optional(),
+  floorUnit: z.string().optional(),
   addressText: z.string().min(10, "Please provide a detailed delivery address"),
   locationNotes: z.string().max(500).optional(),
 });
@@ -87,6 +95,14 @@ export default function ProductDetail() {
         quantity: parseInt(formData.get("quantity") as string),
         addressText: formData.get("addressText") as string,
         locationNotes: formData.get("locationNotes") as string || "",
+        customerName: formData.get("customerName") as string,
+        phoneNumber: formData.get("phoneNumber") as string,
+        email: formData.get("email") as string || "",
+        alternativePhone: formData.get("alternativePhone") as string || "",
+        county: formData.get("county") as string,
+        town: formData.get("town") as string,
+        buildingName: formData.get("buildingName") as string || "",
+        floorUnit: formData.get("floorUnit") as string || "",
       };
 
       orderSchema.parse(data);
@@ -109,13 +125,21 @@ export default function ProductDetail() {
 
       if (orderError) throw orderError;
 
-      // Create delivery location
+      // Create delivery location with all customer details
       const { error: locationError } = await supabase
         .from("delivery_locations")
         .insert({
           order_id: order.id,
           address_text: data.addressText,
           location_notes: data.locationNotes,
+          customer_name: data.customerName,
+          phone_number: data.phoneNumber,
+          email: data.email || null,
+          alternative_phone: data.alternativePhone || null,
+          county: data.county,
+          town: data.town,
+          building_name: data.buildingName || null,
+          floor_unit: data.floorUnit || null,
         });
 
       if (locationError) throw locationError;
@@ -366,23 +390,105 @@ export default function ProductDetail() {
                       </p>
                     </div>
 
-                    <div>
-                      <Label htmlFor="addressText">Delivery Address</Label>
-                      <Textarea
-                        id="addressText"
-                        name="addressText"
-                        placeholder="Enter full delivery address..."
-                        rows={3}
-                        required
-                      />
+                    <div className="border-t pt-4">
+                      <h4 className="font-medium mb-3">Customer Details</h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <Label htmlFor="customerName">Full Name *</Label>
+                          <Input
+                            id="customerName"
+                            name="customerName"
+                            placeholder="Your full name"
+                            required
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="phoneNumber">Phone Number *</Label>
+                          <Input
+                            id="phoneNumber"
+                            name="phoneNumber"
+                            type="tel"
+                            placeholder="0712345678"
+                            required
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="email">Email Address</Label>
+                          <Input
+                            id="email"
+                            name="email"
+                            type="email"
+                            placeholder="your@email.com"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="alternativePhone">Alternative Phone</Label>
+                          <Input
+                            id="alternativePhone"
+                            name="alternativePhone"
+                            type="tel"
+                            placeholder="Optional backup number"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="border-t pt-4">
+                      <h4 className="font-medium mb-3">Delivery Location</h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <Label htmlFor="county">County *</Label>
+                          <Input
+                            id="county"
+                            name="county"
+                            placeholder="e.g., Nairobi"
+                            required
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="town">Town/Area *</Label>
+                          <Input
+                            id="town"
+                            name="town"
+                            placeholder="e.g., Westlands"
+                            required
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="buildingName">Building/Estate Name</Label>
+                          <Input
+                            id="buildingName"
+                            name="buildingName"
+                            placeholder="Building or estate name"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="floorUnit">Floor/Unit Number</Label>
+                          <Input
+                            id="floorUnit"
+                            name="floorUnit"
+                            placeholder="e.g., 3rd Floor, Unit 5"
+                          />
+                        </div>
+                      </div>
+                      <div className="mt-4">
+                        <Label htmlFor="addressText">Full Address/Directions *</Label>
+                        <Textarea
+                          id="addressText"
+                          name="addressText"
+                          placeholder="Enter detailed delivery address and directions..."
+                          rows={3}
+                          required
+                        />
+                      </div>
                     </div>
 
                     <div>
-                      <Label htmlFor="locationNotes">Additional Notes (Optional)</Label>
+                      <Label htmlFor="locationNotes">Special Instructions (Optional)</Label>
                       <Textarea
                         id="locationNotes"
                         name="locationNotes"
-                        placeholder="Any special instructions..."
+                        placeholder="Any special delivery instructions, landmarks, or notes..."
                         rows={2}
                       />
                     </div>

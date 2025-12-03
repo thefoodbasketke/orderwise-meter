@@ -49,6 +49,52 @@ export default function CustomerOrders() {
   useEffect(() => {
     if (user) {
       fetchOrders();
+
+      // Subscribe to real-time updates for payments
+      const paymentsChannel = supabase
+        .channel('payments-changes')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'payments',
+          },
+          (payload) => {
+            console.log('Payment update received:', payload);
+            fetchOrders(); // Refresh orders when payment status changes
+            if (payload.eventType === 'UPDATE' && payload.new.status === 'success') {
+              toast({
+                title: "Payment Successful!",
+                description: "Your payment has been confirmed.",
+              });
+            }
+          }
+        )
+        .subscribe();
+
+      // Subscribe to real-time updates for orders
+      const ordersChannel = supabase
+        .channel('orders-changes')
+        .on(
+          'postgres_changes',
+          {
+            event: 'UPDATE',
+            schema: 'public',
+            table: 'orders',
+            filter: `customer_id=eq.${user.id}`,
+          },
+          (payload) => {
+            console.log('Order update received:', payload);
+            fetchOrders(); // Refresh orders when status changes
+          }
+        )
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(paymentsChannel);
+        supabase.removeChannel(ordersChannel);
+      };
     }
   }, [user]);
 
