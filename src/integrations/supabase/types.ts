@@ -17,27 +17,51 @@ export type Database = {
       delivery_locations: {
         Row: {
           address_text: string
+          alternative_phone: string | null
+          building_name: string | null
+          county: string | null
           created_at: string
+          customer_name: string | null
+          email: string | null
+          floor_unit: string | null
           id: string
           location_notes: string | null
           order_id: string
+          phone_number: string | null
           screenshot_url: string | null
+          town: string | null
         }
         Insert: {
           address_text: string
+          alternative_phone?: string | null
+          building_name?: string | null
+          county?: string | null
           created_at?: string
+          customer_name?: string | null
+          email?: string | null
+          floor_unit?: string | null
           id?: string
           location_notes?: string | null
           order_id: string
+          phone_number?: string | null
           screenshot_url?: string | null
+          town?: string | null
         }
         Update: {
           address_text?: string
+          alternative_phone?: string | null
+          building_name?: string | null
+          county?: string | null
           created_at?: string
+          customer_name?: string | null
+          email?: string | null
+          floor_unit?: string | null
           id?: string
           location_notes?: string | null
           order_id?: string
+          phone_number?: string | null
           screenshot_url?: string | null
+          town?: string | null
         }
         Relationships: [
           {
