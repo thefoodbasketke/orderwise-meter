@@ -197,34 +197,40 @@ export type Database = {
       products: {
         Row: {
           base_price: number
+          catalogue_pdf_url: string | null
           category: string | null
           created_at: string
           description: string | null
           id: string
           image_url: string | null
           name: string
+          specifications: string | null
           stock: number
           updated_at: string
         }
         Insert: {
           base_price: number
+          catalogue_pdf_url?: string | null
           category?: string | null
           created_at?: string
           description?: string | null
           id?: string
           image_url?: string | null
           name: string
+          specifications?: string | null
           stock?: number
           updated_at?: string
         }
         Update: {
           base_price?: number
+          catalogue_pdf_url?: string | null
           category?: string | null
           created_at?: string
           description?: string | null
           id?: string
           image_url?: string | null
           name?: string
+          specifications?: string | null
           stock?: number
           updated_at?: string
         }
