@@ -15,6 +15,16 @@ import AdminProducts from "./pages/admin/Products";
 import AdminOrders from "./pages/admin/Orders";
 import AdminNegotiations from "./pages/admin/Negotiations";
 import AdminPayments from "./pages/admin/Payments";
+import About from "./pages/About";
+import Services from "./pages/Services";
+import Contact from "./pages/Contact";
+import FAQ from "./pages/FAQ";
+import Blog from "./pages/Blog";
+import Testimonials from "./pages/Testimonials";
+import Careers from "./pages/Careers";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import Terms from "./pages/Terms";
+import RegisterMeter from "./pages/RegisterMeter";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -33,6 +43,16 @@ const App = () => (
             <Route path="/product/:id" element={<ProductDetail />} />
             <Route path="/orders" element={<CustomerOrders />} />
             <Route path="/negotiations" element={<Negotiations />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/services" element={<Services />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/faq" element={<FAQ />} />
+            <Route path="/blog" element={<Blog />} />
+            <Route path="/testimonials" element={<Testimonials />} />
+            <Route path="/careers" element={<Careers />} />
+            <Route path="/privacy" element={<PrivacyPolicy />} />
+            <Route path="/terms" element={<Terms />} />
+            <Route path="/register-meter" element={<RegisterMeter />} />
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/admin/products" element={<AdminProducts />} />
             <Route path="/admin/orders" element={<AdminOrders />} />
