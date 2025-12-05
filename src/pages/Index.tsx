@@ -13,12 +13,23 @@ import {
   Droplets, 
   Flame,
   Phone,
-  Mail,
-  MapPin,
   ArrowRight,
-  CheckCircle2
+  CheckCircle2,
+  Star,
+  Users,
+  Award,
+  Building2,
+  Wrench,
+  HeadphonesIcon
 } from "lucide-react";
 import umsLogo from "@/assets/ums-logo.png";
+
+const stats = [
+  { value: "10K+", label: "Meters Installed", icon: Zap },
+  { value: "500+", label: "Happy Clients", icon: Users },
+  { value: "47", label: "Counties Served", icon: Building2 },
+  { value: "99%", label: "Satisfaction Rate", icon: Award },
+];
 
 const meterCategories = [
   {
@@ -38,6 +49,33 @@ const meterCategories = [
     title: "Smart Gas Meters",
     description: "Reliable gas meters with prepaid functionality and safety features",
     color: "bg-orange-500/10 text-orange-600",
+  },
+];
+
+const services = [
+  { icon: Wrench, title: "Installation", description: "Professional meter installation by certified technicians" },
+  { icon: HeadphonesIcon, title: "24/7 Support", description: "Round-the-clock technical assistance" },
+  { icon: Shield, title: "Warranty", description: "Comprehensive warranty on all products" },
+];
+
+const testimonials = [
+  {
+    name: "John Kamau",
+    role: "Property Manager, Greenview Estate",
+    content: "UMS meters have transformed how we manage utilities in our estate. The prepaid system has eliminated billing disputes completely.",
+    rating: 5,
+  },
+  {
+    name: "Mary Wanjiku",
+    role: "Landlord, Nairobi",
+    content: "Excellent service from installation to support. My tenants love the convenience of prepaid meters.",
+    rating: 5,
+  },
+  {
+    name: "Peter Ochieng",
+    role: "Facilities Manager",
+    content: "Professional team and quality products. We've seen significant improvement in utility management across our buildings.",
+    rating: 5,
   },
 ];
 
@@ -132,6 +170,23 @@ export default function Index() {
         </div>
       </section>
 
+      {/* Stats Section */}
+      <section className="py-12 bg-muted/30">
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+            {stats.map((stat, index) => (
+              <div key={index} className="text-center">
+                <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-3">
+                  <stat.icon className="h-6 w-6 text-primary" />
+                </div>
+                <div className="text-3xl font-bold text-primary mb-1">{stat.value}</div>
+                <div className="text-sm text-muted-foreground">{stat.label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Product Categories */}
       <section className="py-20">
         <div className="container mx-auto px-4">
@@ -161,12 +216,43 @@ export default function Index() {
         </div>
       </section>
 
+      {/* Services Preview */}
+      <section className="py-16 bg-muted/30">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-10">
+            <h2 className="text-3xl font-bold mb-4">Our Services</h2>
+            <p className="text-muted-foreground max-w-lg mx-auto">
+              Complete metering solutions from installation to ongoing support
+            </p>
+          </div>
+          <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+            {services.map((service, index) => (
+              <Card key={index} className="text-center p-6 hover:shadow-hover transition-shadow">
+                <div className="h-14 w-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                  <service.icon className="h-7 w-7 text-primary" />
+                </div>
+                <h3 className="font-semibold mb-2">{service.title}</h3>
+                <p className="text-sm text-muted-foreground">{service.description}</p>
+              </Card>
+            ))}
+          </div>
+          <div className="text-center mt-8">
+            <Link to="/services">
+              <Button variant="outline">
+                View All Services
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* Features Section */}
-      <section className="py-20 bg-muted/30">
+      <section className="py-20">
         <div className="container mx-auto px-4">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
-              <h2 className="text-3xl md:text-4xl font-bold mb-6">Why Choose UMS Prepaid?</h2>
+              <h2 className="text-3xl md:text-4xl font-bold mb-6">Why Choose UMS Kenya?</h2>
               <p className="text-muted-foreground mb-8">
                 With years of experience in utility metering solutions, we provide quality products 
                 and exceptional service to customers across Kenya.
@@ -229,6 +315,42 @@ export default function Index() {
         </div>
       </section>
 
+      {/* Testimonials Section */}
+      <section className="py-16 bg-muted/30">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-10">
+            <h2 className="text-3xl font-bold mb-4">What Our Clients Say</h2>
+            <p className="text-muted-foreground max-w-lg mx-auto">
+              Trusted by property managers, landlords, and businesses across Kenya
+            </p>
+          </div>
+          <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+            {testimonials.map((testimonial, index) => (
+              <Card key={index} className="p-6">
+                <div className="flex gap-1 mb-4">
+                  {[...Array(testimonial.rating)].map((_, i) => (
+                    <Star key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                  ))}
+                </div>
+                <p className="text-muted-foreground mb-4 text-sm italic">"{testimonial.content}"</p>
+                <div>
+                  <p className="font-semibold text-sm">{testimonial.name}</p>
+                  <p className="text-xs text-muted-foreground">{testimonial.role}</p>
+                </div>
+              </Card>
+            ))}
+          </div>
+          <div className="text-center mt-8">
+            <Link to="/testimonials">
+              <Button variant="outline">
+                View All Testimonials
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* CTA Section */}
       <section className="py-20 bg-gradient-hero relative overflow-hidden">
         <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg%20width%3D%2260%22%20height%3D%2260%22%20viewBox%3D%220%200%2060%2060%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cg%20fill%3D%22none%22%20fill-rule%3D%22evenodd%22%3E%3Cg%20fill%3D%22%23ffffff%22%20fill-opacity%3D%220.05%22%3E%3Cpath%20d%3D%22M36%2034v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6%2034v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6%204V0H4v4H0v2h4v4h2V6h4V4H6z%22%2F%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fsvg%3E')] opacity-30"></div>
@@ -245,68 +367,17 @@ export default function Index() {
                 View All Products
               </Button>
             </Link>
-            <a href="tel:0709155585">
+            <a href="tel:0700444448">
               <Button size="lg" variant="outline" className="bg-white/10 text-primary-foreground border-white/20 hover:bg-white/20">
                 <Phone className="mr-2 h-4 w-4" />
-                Call Us: 0709 155585
+                Call: 0700 444 448
               </Button>
             </a>
           </div>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="bg-foreground text-background py-16">
-        <div className="container mx-auto px-4">
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-10">
-            <div>
-              <img src={umsLogo} alt="UMS Prepaid" className="h-12 mb-4 brightness-0 invert" />
-              <p className="text-background/70 text-sm">
-                Your trusted partner for quality utility metering solutions in Kenya.
-              </p>
-            </div>
-            
-            <div>
-              <h4 className="font-semibold mb-4">Quick Links</h4>
-              <ul className="space-y-2 text-sm text-background/70">
-                <li><Link to="/products" className="hover:text-background transition-colors">Products</Link></li>
-                <li><Link to="/auth" className="hover:text-background transition-colors">Sign In</Link></li>
-              </ul>
-            </div>
-            
-            <div>
-              <h4 className="font-semibold mb-4">Products</h4>
-              <ul className="space-y-2 text-sm text-background/70">
-                <li>Prepaid Electricity Meters</li>
-                <li>Smart Water Meters</li>
-                <li>Smart Gas Meters</li>
-              </ul>
-            </div>
-            
-            <div>
-              <h4 className="font-semibold mb-4">Contact Us</h4>
-              <ul className="space-y-3 text-sm text-background/70">
-                <li className="flex items-center gap-2">
-                  <Phone className="h-4 w-4" />
-                  <a href="tel:0709155585" className="hover:text-background transition-colors">0709 155585</a>
-                </li>
-                <li className="flex items-center gap-2">
-                  <Mail className="h-4 w-4" />
-                  <a href="mailto:info@umskenya.com" className="hover:text-background transition-colors">info@umskenya.com</a>
-                </li>
-                <li className="flex items-start gap-2">
-                  <MapPin className="h-4 w-4 mt-0.5" />
-                  <span>Capital One Plaza, Eastern Bypass Kamakis Rd, Nairobi, Kenya</span>
-                </li>
-              </ul>
-            </div>
-          </div>
-          
-          <div className="border-t border-background/10 mt-10 pt-8 text-center text-sm text-background/50">
-            <p>&copy; {new Date().getFullYear()} UMS Prepaid. All rights reserved.</p>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

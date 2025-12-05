@@ -2,11 +2,13 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Navbar } from "@/components/Navbar";
+import { Footer } from "@/components/Footer";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { Package } from "lucide-react";
+import { Package, Search, Filter, Zap, Droplets, Flame, Grid3X3, List } from "lucide-react";
 
 interface Product {
   id: string;
@@ -18,14 +20,28 @@ interface Product {
   category: string;
 }
 
+const categories = [
+  { value: "all", label: "All Products", icon: Grid3X3 },
+  { value: "Electricity Meters", label: "Electricity", icon: Zap },
+  { value: "Water Meters", label: "Water", icon: Droplets },
+  { value: "Gas Meters", label: "Gas", icon: Flame },
+];
+
 export default function Products() {
   const [products, setProducts] = useState<Product[]>([]);
+  const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("all");
   const { toast } = useToast();
 
   useEffect(() => {
     fetchProducts();
   }, []);
+
+  useEffect(() => {
+    filterProducts();
+  }, [products, searchQuery, selectedCategory]);
 
   const fetchProducts = async () => {
     try {
@@ -47,6 +63,24 @@ export default function Products() {
     }
   };
 
+  const filterProducts = () => {
+    let filtered = [...products];
+
+    if (searchQuery) {
+      filtered = filtered.filter(
+        (p) =>
+          p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          p.description?.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+
+    if (selectedCategory !== "all") {
+      filtered = filtered.filter((p) => p.category === selectedCategory);
+    }
+
+    setFilteredProducts(filtered);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
@@ -64,24 +98,63 @@ export default function Products() {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      
-      <div className="container mx-auto px-4 py-12">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">Our Products</h1>
-          <p className="text-muted-foreground">Browse our collection of quality UMS meters</p>
+
+      {/* Hero Section */}
+      <section className="bg-gradient-hero py-12 md:py-16">
+        <div className="container mx-auto px-4 text-center">
+          <h1 className="text-3xl md:text-4xl font-bold text-primary-foreground mb-2">
+            Our Products
+          </h1>
+          <p className="text-primary-foreground/80 max-w-xl mx-auto">
+            Quality prepaid meters with competitive KES pricing
+          </p>
+        </div>
+      </section>
+
+      <div className="container mx-auto px-4 py-8">
+        {/* Filters */}
+        <div className="flex flex-col md:flex-row gap-4 mb-8">
+          <div className="relative flex-1 max-w-md">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search products..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+          <div className="flex gap-2 overflow-x-auto pb-2">
+            {categories.map((cat) => (
+              <Button
+                key={cat.value}
+                variant={selectedCategory === cat.value ? "default" : "outline"}
+                size="sm"
+                onClick={() => setSelectedCategory(cat.value)}
+                className="flex-shrink-0"
+              >
+                <cat.icon className="h-4 w-4 mr-1" />
+                {cat.label}
+              </Button>
+            ))}
+          </div>
         </div>
 
-        {products.length === 0 ? (
+        {/* Results count */}
+        <p className="text-sm text-muted-foreground mb-6">
+          Showing {filteredProducts.length} of {products.length} products
+        </p>
+
+        {filteredProducts.length === 0 ? (
           <Card className="text-center py-12">
             <CardContent>
               <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-semibold mb-2">No Products Available</h3>
-              <p className="text-muted-foreground">Check back soon for new products</p>
+              <h3 className="text-lg font-semibold mb-2">No Products Found</h3>
+              <p className="text-muted-foreground">Try adjusting your search or filter</p>
             </CardContent>
           </Card>
         ) : (
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {products.map((product) => (
+            {filteredProducts.map((product) => (
               <Card key={product.id} className="group hover:shadow-hover transition-all duration-300">
                 <CardHeader className="p-0">
                   <div className="aspect-square bg-muted rounded-t-lg overflow-hidden">
@@ -117,10 +190,15 @@ export default function Products() {
                     </Badge>
                   )}
                 </CardContent>
-                <CardFooter className="p-4 pt-0">
-                  <Link to={`/product/${product.id}`} className="w-full">
+                <CardFooter className="p-4 pt-0 flex gap-2">
+                  <Link to={`/product/${product.id}`} className="flex-1">
                     <Button className="w-full" disabled={product.stock === 0}>
                       View Details
+                    </Button>
+                  </Link>
+                  <Link to="/quotation">
+                    <Button variant="outline" size="icon" title="Request Quote">
+                      <Filter className="h-4 w-4" />
                     </Button>
                   </Link>
                 </CardFooter>
@@ -129,6 +207,8 @@ export default function Products() {
           </div>
         )}
       </div>
+
+      <Footer />
     </div>
   );
 }

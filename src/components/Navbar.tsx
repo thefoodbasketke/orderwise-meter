@@ -1,12 +1,13 @@
 import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
-import { ShoppingCart, User, LogOut, LayoutDashboard, Package, Menu } from "lucide-react";
+import { ShoppingCart, User, LogOut, LayoutDashboard, Menu, ChevronDown } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import {
   Sheet,
@@ -18,9 +19,18 @@ import umsLogo from "@/assets/ums-logo.png";
 const navLinks = [
   { href: "/products", label: "Products" },
   { href: "/services", label: "Services" },
+  { href: "/projects", label: "Projects" },
   { href: "/about", label: "About" },
   { href: "/contact", label: "Contact" },
+];
+
+const moreLinks = [
+  { href: "/quotation", label: "Request Quote" },
   { href: "/faq", label: "FAQs" },
+  { href: "/blog", label: "Blog" },
+  { href: "/testimonials", label: "Testimonials" },
+  { href: "/careers", label: "Careers" },
+  { href: "/register-meter", label: "Register Meter" },
 ];
 
 export function Navbar() {
@@ -41,6 +51,22 @@ export function Navbar() {
                 <Button variant="ghost" size="sm">{link.label}</Button>
               </Link>
             ))}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm">
+                  More <ChevronDown className="ml-1 h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                {moreLinks.map((link) => (
+                  <DropdownMenuItem key={link.href} asChild>
+                    <Link to={link.href} className="cursor-pointer w-full">
+                      {link.label}
+                    </Link>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
 
           <div className="flex items-center space-x-2">
@@ -112,6 +138,14 @@ export function Navbar() {
                       {link.label}
                     </Link>
                   ))}
+                  <div className="border-t pt-4 mt-2">
+                    <p className="text-sm text-muted-foreground mb-3">More</p>
+                    {moreLinks.map((link) => (
+                      <Link key={link.href} to={link.href} className="block py-2 text-sm hover:text-primary">
+                        {link.label}
+                      </Link>
+                    ))}
+                  </div>
                 </div>
               </SheetContent>
             </Sheet>
