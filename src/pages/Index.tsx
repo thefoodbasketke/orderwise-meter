@@ -13,6 +13,8 @@ import {
   Droplets, 
   Flame,
   Phone,
+  Mail,
+  MapPin,
   ArrowRight,
   CheckCircle2
 } from "lucide-react";
