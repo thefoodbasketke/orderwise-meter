@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
+import { AnimatePresence } from "framer-motion";
 
 // Pages
 import Index from "./pages/Index";
@@ -32,6 +33,8 @@ import AdminProducts from "./pages/admin/Products";
 import AdminOrders from "./pages/admin/Orders";
 import AdminNegotiations from "./pages/admin/Negotiations";
 import AdminPayments from "./pages/admin/Payments";
+import AdminMeterRegistrations from "./pages/admin/MeterRegistrations";
+import AdminQuoteRequests from "./pages/admin/QuoteRequests";
 
 import { ProtectedRoute } from "./components/ProtectedRoute";
 
@@ -44,40 +47,44 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
-          <Routes>
-            {/* Public Routes */}
-            <Route path="/" element={<Index />} />
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/services" element={<Services />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/faq" element={<FAQ />} />
-            <Route path="/blog" element={<Blog />} />
-            <Route path="/testimonials" element={<Testimonials />} />
-            <Route path="/careers" element={<Careers />} />
-            <Route path="/privacy" element={<PrivacyPolicy />} />
-            <Route path="/terms" element={<Terms />} />
-            <Route path="/register-meter" element={<RegisterMeter />} />
-            <Route path="/projects" element={<Projects />} />
-            <Route path="/quotation" element={<Quotation />} />
-            
-            {/* Product Routes */}
-            <Route path="/products" element={<Products />} />
-            <Route path="/product/:id" element={<ProductDetail />} />
-            
-            {/* Customer Routes */}
-            <Route path="/orders" element={<CustomerOrders />} />
-            <Route path="/negotiations" element={<Negotiations />} />
-            
-            {/* Admin Routes */}
-            <Route path="/admin" element={<ProtectedRoute requireAdmin><AdminDashboard /></ProtectedRoute>} />
-            <Route path="/admin/products" element={<ProtectedRoute requireAdmin><AdminProducts /></ProtectedRoute>} />
-            <Route path="/admin/orders" element={<ProtectedRoute requireAdmin><AdminOrders /></ProtectedRoute>} />
-            <Route path="/admin/negotiations" element={<ProtectedRoute requireAdmin><AdminNegotiations /></ProtectedRoute>} />
-            <Route path="/admin/payments" element={<ProtectedRoute requireAdmin><AdminPayments /></ProtectedRoute>} />
-            
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+          <AnimatePresence mode="wait">
+            <Routes>
+              {/* Public Routes */}
+              <Route path="/" element={<Index />} />
+              <Route path="/auth" element={<Auth />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/services" element={<Services />} />
+              <Route path="/contact" element={<Contact />} />
+              <Route path="/faq" element={<FAQ />} />
+              <Route path="/blog" element={<Blog />} />
+              <Route path="/testimonials" element={<Testimonials />} />
+              <Route path="/careers" element={<Careers />} />
+              <Route path="/privacy" element={<PrivacyPolicy />} />
+              <Route path="/terms" element={<Terms />} />
+              <Route path="/register-meter" element={<RegisterMeter />} />
+              <Route path="/projects" element={<Projects />} />
+              <Route path="/quotation" element={<Quotation />} />
+              
+              {/* Product Routes */}
+              <Route path="/products" element={<Products />} />
+              <Route path="/product/:id" element={<ProductDetail />} />
+              
+              {/* Customer Routes */}
+              <Route path="/orders" element={<CustomerOrders />} />
+              <Route path="/negotiations" element={<Negotiations />} />
+              
+              {/* Admin Routes */}
+              <Route path="/admin" element={<ProtectedRoute requireAdmin><AdminDashboard /></ProtectedRoute>} />
+              <Route path="/admin/products" element={<ProtectedRoute requireAdmin><AdminProducts /></ProtectedRoute>} />
+              <Route path="/admin/orders" element={<ProtectedRoute requireAdmin><AdminOrders /></ProtectedRoute>} />
+              <Route path="/admin/negotiations" element={<ProtectedRoute requireAdmin><AdminNegotiations /></ProtectedRoute>} />
+              <Route path="/admin/payments" element={<ProtectedRoute requireAdmin><AdminPayments /></ProtectedRoute>} />
+              <Route path="/admin/meter-registrations" element={<ProtectedRoute requireAdmin><AdminMeterRegistrations /></ProtectedRoute>} />
+              <Route path="/admin/quote-requests" element={<ProtectedRoute requireAdmin><AdminQuoteRequests /></ProtectedRoute>} />
+              
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </AnimatePresence>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
