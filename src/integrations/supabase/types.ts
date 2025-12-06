@@ -73,6 +73,51 @@ export type Database = {
           },
         ]
       }
+      meter_registrations: {
+        Row: {
+          address: string
+          created_at: string
+          customer_name: string
+          email: string
+          id: string
+          meter_numbers: string[]
+          notes: string | null
+          phone: string
+          purchase_date: string | null
+          purchase_location: string | null
+          receipt_number: string | null
+          warranty_extended: boolean | null
+        }
+        Insert: {
+          address: string
+          created_at?: string
+          customer_name: string
+          email: string
+          id?: string
+          meter_numbers: string[]
+          notes?: string | null
+          phone: string
+          purchase_date?: string | null
+          purchase_location?: string | null
+          receipt_number?: string | null
+          warranty_extended?: boolean | null
+        }
+        Update: {
+          address?: string
+          created_at?: string
+          customer_name?: string
+          email?: string
+          id?: string
+          meter_numbers?: string[]
+          notes?: string | null
+          phone?: string
+          purchase_date?: string | null
+          purchase_location?: string | null
+          receipt_number?: string | null
+          warranty_extended?: boolean | null
+        }
+        Relationships: []
+      }
       negotiations: {
         Row: {
           admin_message: string | null
@@ -280,6 +325,66 @@ export type Database = {
           full_name?: string | null
           id?: string
           phone_number?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      quote_requests: {
+        Row: {
+          admin_notes: string | null
+          budget: string | null
+          company_name: string | null
+          contact_name: string
+          created_at: string
+          email: string
+          file_url: string | null
+          id: string
+          location: string
+          meter_type: string
+          phone: string
+          project_type: string
+          quantity: number
+          requirements: string | null
+          status: string
+          timeline: string | null
+          updated_at: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          budget?: string | null
+          company_name?: string | null
+          contact_name: string
+          created_at?: string
+          email: string
+          file_url?: string | null
+          id?: string
+          location: string
+          meter_type: string
+          phone: string
+          project_type: string
+          quantity: number
+          requirements?: string | null
+          status?: string
+          timeline?: string | null
+          updated_at?: string
+        }
+        Update: {
+          admin_notes?: string | null
+          budget?: string | null
+          company_name?: string | null
+          contact_name?: string
+          created_at?: string
+          email?: string
+          file_url?: string | null
+          id?: string
+          location?: string
+          meter_type?: string
+          phone?: string
+          project_type?: string
+          quantity?: number
+          requirements?: string | null
+          status?: string
+          timeline?: string | null
           updated_at?: string
         }
         Relationships: []
