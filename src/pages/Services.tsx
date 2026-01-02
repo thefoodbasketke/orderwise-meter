@@ -1,4 +1,6 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,15 +14,26 @@ import {
   Gauge,
   ArrowRight,
   Phone,
-  CheckCircle2
+  CheckCircle2,
+  Zap,
+  Droplets,
+  Flame
 } from "lucide-react";
 
-const services = [
+interface Service {
+  id: string;
+  title: string;
+  description: string | null;
+  icon_name: string | null;
+  features: string[] | null;
+  is_active: boolean;
+}
+
+const defaultServices = [
   {
     icon: Wrench,
     title: "Meter Installation",
     description: "Professional installation of prepaid electricity, water, and gas meters by certified technicians.",
-    price: "From KSh 2,500",
     features: [
       "Certified installation team",
       "Same-day service available",
@@ -32,7 +45,6 @@ const services = [
     icon: HeadphonesIcon,
     title: "Technical Support",
     description: "24/7 technical assistance for all your meter-related queries and issues.",
-    price: "Free with purchase",
     features: [
       "Round-the-clock support",
       "Remote troubleshooting",
@@ -44,7 +56,6 @@ const services = [
     icon: Settings,
     title: "Maintenance Services",
     description: "Regular maintenance and servicing to ensure your meters function optimally.",
-    price: "From KSh 1,500",
     features: [
       "Scheduled maintenance",
       "Performance optimization",
@@ -56,7 +67,6 @@ const services = [
     icon: ClipboardCheck,
     title: "Engineering Consultations",
     description: "Expert advice on metering systems, capacity planning, and utility management.",
-    price: "From KSh 5,000",
     features: [
       "System design",
       "Capacity assessment",
@@ -68,7 +78,6 @@ const services = [
     icon: Gauge,
     title: "Calibration Services",
     description: "Precision calibration to ensure accurate readings and fair billing.",
-    price: "From KSh 3,000",
     features: [
       "KEBS-certified calibration",
       "Accuracy verification",
@@ -77,6 +86,10 @@ const services = [
     ]
   }
 ];
+
+const iconMap: Record<string, any> = {
+  Wrench, HeadphonesIcon, Settings, ClipboardCheck, Gauge, Zap, Droplets, Flame
+};
 
 const processSteps = [
   { step: "01", title: "Contact Us", description: "Reach out via phone, email, or request form" },
@@ -87,6 +100,32 @@ const processSteps = [
 ];
 
 export default function Services() {
+  const [dbServices, setDbServices] = useState<Service[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchServices = async () => {
+      try {
+        const { data } = await supabase.from("services").select("*").order("sort_order");
+        if (data) setDbServices(data);
+      } catch (error) {
+        console.error("Error fetching services:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchServices();
+  }, []);
+
+  const services = dbServices.length > 0 
+    ? dbServices.map(s => ({
+        icon: iconMap[s.icon_name || ""] || Wrench,
+        title: s.title,
+        description: s.description || "",
+        features: s.features || []
+      }))
+    : defaultServices;
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
@@ -114,9 +153,6 @@ export default function Services() {
                     <div className="h-14 w-14 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
                       <service.icon className="h-7 w-7 text-primary" />
                     </div>
-                    <Badge variant="secondary" className="font-semibold">
-                      {service.price}
-                    </Badge>
                   </div>
                   <CardTitle className="text-xl">{service.title}</CardTitle>
                 </CardHeader>

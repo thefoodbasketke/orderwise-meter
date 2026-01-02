@@ -1,81 +1,84 @@
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { Card, CardContent } from "@/components/ui/card";
-import { Star, Quote, Building, Home, Factory } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
+import { Star, Quote, Building, Home, Factory, User } from "lucide-react";
 
-const testimonials = [
+interface Testimonial {
+  id: string;
+  client_name: string;
+  company: string | null;
+  role: string | null;
+  content: string;
+  rating: number;
+  image_url: string | null;
+  is_featured: boolean;
+}
+
+const defaultTestimonials = [
   {
-    id: 1,
-    name: "John Kamau",
+    id: "1",
+    client_name: "John Kamau",
     role: "Property Owner",
-    location: "Nairobi",
-    type: "residential",
+    company: "Nairobi",
     rating: 5,
-    text: "UMS prepaid meters have transformed how I manage my rental properties. No more disputes over utility bills - tenants pay for what they use, and I receive payments automatically via M-Pesa. Highly recommend!",
+    content: "UMS prepaid meters have transformed how I manage my rental properties. No more disputes over utility bills - tenants pay for what they use, and I receive payments automatically via M-Pesa. Highly recommend!",
+    image_url: null,
+    is_featured: false,
   },
   {
-    id: 2,
-    name: "Mary Wanjiku",
+    id: "2",
+    client_name: "Mary Wanjiku",
     role: "Apartment Manager",
-    location: "Mombasa",
-    type: "residential",
+    company: "Mombasa",
     rating: 5,
-    text: "The installation was quick and professional. The meters are accurate and the customer support is excellent. Our tenants love the convenience of buying tokens via M-Pesa.",
+    content: "The installation was quick and professional. The meters are accurate and the customer support is excellent. Our tenants love the convenience of buying tokens via M-Pesa.",
+    image_url: null,
+    is_featured: false,
   },
   {
-    id: 3,
-    name: "Peter Ochieng",
+    id: "3",
+    client_name: "Peter Ochieng",
     role: "Commercial Building Owner",
-    location: "Kisumu",
-    type: "commercial",
+    company: "Kisumu",
     rating: 5,
-    text: "Managing utility costs across my commercial building has never been easier. The detailed reports help me track consumption patterns and make informed decisions.",
+    content: "Managing utility costs across my commercial building has never been easier. The detailed reports help me track consumption patterns and make informed decisions.",
+    image_url: null,
+    is_featured: false,
   },
   {
-    id: 4,
-    name: "Grace Muthoni",
+    id: "4",
+    client_name: "Grace Muthoni",
     role: "Real Estate Developer",
-    location: "Nakuru",
-    type: "commercial",
+    company: "Nakuru",
     rating: 4,
-    text: "We've installed UMS meters in all our new developments. The quality is outstanding and the after-sales support is responsive. A reliable partner for any property developer.",
+    content: "We've installed UMS meters in all our new developments. The quality is outstanding and the after-sales support is responsive. A reliable partner for any property developer.",
+    image_url: null,
+    is_featured: false,
   },
   {
-    id: 5,
-    name: "David Kiprop",
+    id: "5",
+    client_name: "David Kiprop",
     role: "Industrial Park Manager",
-    location: "Eldoret",
-    type: "industrial",
+    company: "Eldoret",
     rating: 5,
-    text: "For industrial applications, accuracy is crucial. UMS meters have proven to be reliable and precise, helping us manage energy costs effectively across multiple units.",
+    content: "For industrial applications, accuracy is crucial. UMS meters have proven to be reliable and precise, helping us manage energy costs effectively across multiple units.",
+    image_url: null,
+    is_featured: false,
   },
   {
-    id: 6,
-    name: "Anne Njeri",
+    id: "6",
+    client_name: "Anne Njeri",
     role: "Hostel Owner",
-    location: "Thika",
-    type: "residential",
+    company: "Thika",
     rating: 5,
-    text: "Running a student hostel, I was always worried about utility theft and disputes. UMS meters eliminated these problems completely. Best investment I've made!",
+    content: "Running a student hostel, I was always worried about utility theft and disputes. UMS meters eliminated these problems completely. Best investment I've made!",
+    image_url: null,
+    is_featured: false,
   },
-  {
-    id: 7,
-    name: "Samuel Mutua",
-    role: "Hotel Owner",
-    location: "Naivasha",
-    type: "commercial",
-    rating: 5,
-    text: "The water meters from UMS have helped us reduce wastage significantly. The smart monitoring features are a game-changer for hospitality businesses.",
-  },
-  {
-    id: 8,
-    name: "Lucy Akinyi",
-    role: "Property Manager",
-    location: "Machakos",
-    type: "residential",
-    rating: 4,
-    text: "Very satisfied with both the products and service. The team was helpful throughout the installation process and provided excellent training on how to use the management portal.",
-  }
 ];
 
 const stats = [
@@ -85,20 +88,29 @@ const stats = [
   { value: "47", label: "Counties Served" },
 ];
 
-const getTypeIcon = (type: string) => {
-  switch (type) {
-    case "residential":
-      return Home;
-    case "commercial":
-      return Building;
-    case "industrial":
-      return Factory;
-    default:
-      return Home;
-  }
-};
-
 export default function Testimonials() {
+  const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchTestimonials = async () => {
+      try {
+        const { data } = await supabase.from("testimonials").select("*").order("sort_order");
+        if (data && data.length > 0) {
+          setTestimonials(data);
+        } else {
+          setTestimonials(defaultTestimonials);
+        }
+      } catch (error) {
+        console.error("Error fetching testimonials:", error);
+        setTestimonials(defaultTestimonials);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchTestimonials();
+  }, []);
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
@@ -133,48 +145,49 @@ export default function Testimonials() {
       <section className="py-16">
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {testimonials.map((testimonial) => {
-              const TypeIcon = getTypeIcon(testimonial.type);
-              return (
-                <Card key={testimonial.id} className="relative hover:shadow-hover transition-shadow">
-                  <CardContent className="pt-6">
-                    <Quote className="h-8 w-8 text-primary/20 absolute top-4 right-4" />
-                    
-                    {/* Rating */}
-                    <div className="flex gap-1 mb-4">
-                      {[...Array(5)].map((_, i) => (
-                        <Star
-                          key={i}
-                          className={`h-4 w-4 ${
-                            i < testimonial.rating
-                              ? "text-yellow-500 fill-yellow-500"
-                              : "text-muted"
-                          }`}
-                        />
-                      ))}
+            {testimonials.map((testimonial) => (
+              <Card key={testimonial.id} className="relative hover:shadow-hover transition-shadow">
+                <CardContent className="pt-6">
+                  <Quote className="h-8 w-8 text-primary/20 absolute top-4 right-4" />
+                  
+                  {/* Rating */}
+                  <div className="flex gap-1 mb-4">
+                    {[...Array(5)].map((_, i) => (
+                      <Star
+                        key={i}
+                        className={`h-4 w-4 ${
+                          i < testimonial.rating
+                            ? "text-yellow-500 fill-yellow-500"
+                            : "text-muted"
+                        }`}
+                      />
+                    ))}
+                  </div>
+                  
+                  {/* Testimonial Text */}
+                  <p className="text-muted-foreground mb-6 text-sm leading-relaxed">
+                    "{testimonial.content}"
+                  </p>
+                  
+                  {/* Author Info */}
+                  <div className="flex items-center gap-3 pt-4 border-t">
+                    <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden">
+                      {testimonial.image_url ? (
+                        <img src={testimonial.image_url} alt={testimonial.client_name} className="w-full h-full object-cover" />
+                      ) : (
+                        <User className="h-5 w-5 text-primary" />
+                      )}
                     </div>
-                    
-                    {/* Testimonial Text */}
-                    <p className="text-muted-foreground mb-6 text-sm leading-relaxed">
-                      "{testimonial.text}"
-                    </p>
-                    
-                    {/* Author Info */}
-                    <div className="flex items-center gap-3 pt-4 border-t">
-                      <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-                        <TypeIcon className="h-5 w-5 text-primary" />
-                      </div>
-                      <div>
-                        <p className="font-semibold text-sm">{testimonial.name}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {testimonial.role} • {testimonial.location}
-                        </p>
-                      </div>
+                    <div>
+                      <p className="font-semibold text-sm">{testimonial.client_name}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {testimonial.role}{testimonial.company && ` • ${testimonial.company}`}
+                      </p>
                     </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
           </div>
         </div>
       </section>
@@ -187,16 +200,12 @@ export default function Testimonials() {
             Experience the difference with UMS Kenya metering solutions
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <a href="/products">
-              <button className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background bg-primary text-primary-foreground hover:bg-primary/90 h-10 py-2 px-4">
-                Browse Products
-              </button>
-            </a>
-            <a href="/contact">
-              <button className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background border border-input hover:bg-accent hover:text-accent-foreground h-10 py-2 px-4">
-                Contact Us
-              </button>
-            </a>
+            <Link to="/products">
+              <Button>Browse Products</Button>
+            </Link>
+            <Link to="/contact">
+              <Button variant="outline">Contact Us</Button>
+            </Link>
           </div>
         </div>
       </section>

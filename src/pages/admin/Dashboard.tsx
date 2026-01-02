@@ -5,7 +5,7 @@ import { Navbar } from "@/components/Navbar";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { AnimatedPage, FadeIn, StaggerContainer, StaggerItem } from "@/components/AnimatedPage";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Package, ShoppingCart, MessageSquare, DollarSign, Gauge, FileText } from "lucide-react";
+import { Package, ShoppingCart, MessageSquare, DollarSign, Gauge, FileText, Settings } from "lucide-react";
 
 interface Stats {
   totalProducts: number;
@@ -185,6 +185,16 @@ export default function AdminDashboard() {
                         >
                           <div className="font-semibold">Quote Requests</div>
                           <div className="text-sm text-muted-foreground">Manage quotation requests</div>
+                        </Link>
+                        <Link
+                          to="/admin/content"
+                          className="block p-3 rounded-lg hover:bg-muted transition-colors"
+                        >
+                          <div className="font-semibold flex items-center gap-2">
+                            <Settings className="h-4 w-4" />
+                            Content Management
+                          </div>
+                          <div className="text-sm text-muted-foreground">Edit About, Projects, Services, Testimonials, Careers</div>
                         </Link>
                       </CardContent>
                     </Card>

@@ -1,3 +1,5 @@
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import { Navbar } from "@/components/Navbar";
 import { Card, CardContent } from "@/components/ui/card";
 import { Footer } from "@/components/Footer";
@@ -10,6 +12,14 @@ import {
   CheckCircle2,
   Building2
 } from "lucide-react";
+
+interface SiteContent {
+  id: string;
+  section_key: string;
+  title: string | null;
+  content: string | null;
+  image_url: string | null;
+}
 
 const values = [
   { icon: Award, title: "Quality", description: "We provide only certified, high-quality metering solutions" },
@@ -26,6 +36,58 @@ const certifications = [
 ];
 
 export default function About() {
+  const [content, setContent] = useState<Record<string, SiteContent>>({});
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchContent = async () => {
+      try {
+        const { data } = await supabase.from("site_content").select("*");
+        if (data) {
+          const contentMap = data.reduce((acc, item) => {
+            acc[item.section_key] = item;
+            return acc;
+          }, {} as Record<string, SiteContent>);
+          setContent(contentMap);
+        }
+      } catch (error) {
+        console.error("Error fetching content:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchContent();
+  }, []);
+
+  const getContent = (key: string, defaultTitle: string, defaultContent: string) => ({
+    title: content[key]?.title || defaultTitle,
+    content: content[key]?.content || defaultContent,
+  });
+
+  const aboutIntro = getContent(
+    "about_intro",
+    "About UMS Kenya",
+    "UMS Kenya is a leading provider of utility metering solutions, specializing in prepaid electricity, water, and gas meters. Based in Nairobi, we serve customers across Kenya with quality products and exceptional service."
+  );
+
+  const mission = getContent(
+    "mission",
+    "Our Mission",
+    "To provide innovative and reliable utility metering solutions that empower property owners and tenants to efficiently manage their utility consumption while ensuring fair billing and transparent transactions."
+  );
+
+  const vision = getContent(
+    "vision",
+    "Our Vision",
+    "To be the leading provider of smart metering solutions in East Africa, setting the standard for quality, innovation, and customer service in the utility metering industry."
+  );
+
+  const charter = getContent(
+    "customer_charter",
+    "Customer Service Charter",
+    "We are committed to providing excellent service to all our customers. Our charter outlines our promises to you regarding quality, timeliness, and support."
+  );
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
@@ -34,7 +96,7 @@ export default function About() {
       <section className="bg-gradient-hero py-16 md:py-24">
         <div className="container mx-auto px-4 text-center">
           <h1 className="text-4xl md:text-5xl font-bold text-primary-foreground mb-4">
-            About UMS Kenya
+            {aboutIntro.title}
           </h1>
           <p className="text-xl text-primary-foreground/80 max-w-2xl mx-auto">
             Kenya's trusted partner in utility metering solutions since establishment
@@ -49,9 +111,7 @@ export default function About() {
             <div>
               <h2 className="text-3xl font-bold mb-6">Our Story</h2>
               <p className="text-muted-foreground mb-4">
-                UMS Kenya is a leading provider of utility metering solutions, specializing in prepaid 
-                electricity, water, and gas meters. Based in Nairobi, we serve customers across Kenya 
-                with quality products and exceptional service.
+                {aboutIntro.content}
               </p>
               <p className="text-muted-foreground mb-4">
                 Our journey began with a simple mission: to make utility management more efficient and 
@@ -84,6 +144,20 @@ export default function About() {
         </div>
       </section>
 
+      {/* Customer Service Charter */}
+      {content.customer_charter && (
+        <section className="py-16 bg-primary/5">
+          <div className="container mx-auto px-4">
+            <div className="max-w-4xl mx-auto text-center">
+              <h2 className="text-3xl font-bold mb-6">{charter.title}</h2>
+              <p className="text-muted-foreground text-lg whitespace-pre-wrap">
+                {charter.content}
+              </p>
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* Mission & Vision */}
       <section className="py-16 bg-muted/30">
         <div className="container mx-auto px-4">
@@ -93,11 +167,9 @@ export default function About() {
                 <div className="h-14 w-14 rounded-xl bg-primary/10 flex items-center justify-center mb-6">
                   <Target className="h-7 w-7 text-primary" />
                 </div>
-                <h3 className="text-2xl font-bold mb-4">Our Mission</h3>
+                <h3 className="text-2xl font-bold mb-4">{mission.title}</h3>
                 <p className="text-muted-foreground">
-                  To provide innovative and reliable utility metering solutions that empower property 
-                  owners and tenants to efficiently manage their utility consumption while ensuring 
-                  fair billing and transparent transactions.
+                  {mission.content}
                 </p>
               </CardContent>
             </Card>
@@ -107,10 +179,9 @@ export default function About() {
                 <div className="h-14 w-14 rounded-xl bg-accent/10 flex items-center justify-center mb-6">
                   <Eye className="h-7 w-7 text-accent" />
                 </div>
-                <h3 className="text-2xl font-bold mb-4">Our Vision</h3>
+                <h3 className="text-2xl font-bold mb-4">{vision.title}</h3>
                 <p className="text-muted-foreground">
-                  To be the leading provider of smart metering solutions in East Africa, setting the 
-                  standard for quality, innovation, and customer service in the utility metering industry.
+                  {vision.content}
                 </p>
               </CardContent>
             </Card>
