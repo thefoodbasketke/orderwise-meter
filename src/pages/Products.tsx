@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { Package, Search, Filter, Zap, Droplets, Flame, Grid3X3, List } from "lucide-react";
+import { Package, Search, Filter, Zap, Droplets, Flame, Grid3X3, MessageCircle } from "lucide-react";
 
 interface Product {
   id: string;
@@ -190,17 +190,36 @@ export default function Products() {
                     </Badge>
                   )}
                 </CardContent>
-                <CardFooter className="p-4 pt-0 flex gap-2">
-                  <Link to={`/product/${product.id}`} className="flex-1">
+                <CardFooter className="p-4 pt-0 flex flex-col gap-2">
+                  <Link to={`/product/${product.id}`} className="w-full">
                     <Button className="w-full" disabled={product.stock === 0}>
                       View Details
                     </Button>
                   </Link>
-                  <Link to="/quotation">
-                    <Button variant="outline" size="icon" title="Request Quote">
-                      <Filter className="h-4 w-4" />
-                    </Button>
-                  </Link>
+                  <div className="flex gap-2 w-full">
+                    <a
+                      href={`https://wa.me/254700444448?text=${encodeURIComponent(`Hi, I'd like to order: ${product.name} (KSh ${product.base_price.toLocaleString()})`)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex-1"
+                    >
+                      <Button variant="default" className="w-full bg-green-600 hover:bg-green-700">
+                        <MessageCircle className="h-4 w-4 mr-1" />
+                        Order
+                      </Button>
+                    </a>
+                    <a
+                      href={`https://wa.me/254700444448?text=${encodeURIComponent(`Hi, I'd like to enquire about: ${product.name}`)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex-1"
+                    >
+                      <Button variant="outline" className="w-full">
+                        <MessageCircle className="h-4 w-4 mr-1" />
+                        Enquire
+                      </Button>
+                    </a>
+                  </div>
                 </CardFooter>
               </Card>
             ))}
