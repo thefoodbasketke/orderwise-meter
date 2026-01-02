@@ -1,4 +1,6 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { Card, CardContent } from "@/components/ui/card";
@@ -9,12 +11,22 @@ import {
   Home, 
   Factory, 
   Users, 
-  CheckCircle2,
   ArrowRight,
   MapPin,
-  Zap,
-  Droplets
+  FolderOpen
 } from "lucide-react";
+
+interface Project {
+  id: string;
+  title: string;
+  description: string | null;
+  client_name: string | null;
+  location: string | null;
+  completion_date: string | null;
+  image_url: string | null;
+  category: string | null;
+  is_featured: boolean;
+}
 
 const stats = [
   { value: "500+", label: "Projects Completed" },
@@ -23,66 +35,72 @@ const stats = [
   { value: "99%", label: "Client Satisfaction" },
 ];
 
-const projects = [
+const defaultProjects = [
   {
+    id: "1",
     title: "Greenfield Estate",
     location: "Kiambu County",
-    type: "Residential",
-    meters: 250,
-    meterType: "Electricity",
+    category: "Residential",
     description: "Complete prepaid electricity metering solution for 250-unit residential estate with central management system.",
-    icon: Home,
-    image: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=600",
+    client_name: null,
+    completion_date: null,
+    image_url: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=600",
+    is_featured: true,
   },
   {
+    id: "2",
     title: "Mombasa Industrial Park",
     location: "Mombasa County",
-    type: "Industrial",
-    meters: 45,
-    meterType: "Electricity & Water",
+    category: "Industrial",
     description: "Industrial-grade smart metering for manufacturing facilities with real-time monitoring.",
-    icon: Factory,
-    image: "https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=600",
+    client_name: null,
+    completion_date: null,
+    image_url: "https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=600",
+    is_featured: true,
   },
   {
+    id: "3",
     title: "Sunrise Apartments",
     location: "Nairobi County",
-    type: "Commercial",
-    meters: 180,
-    meterType: "Water",
+    category: "Commercial",
     description: "Water sub-metering solution enabling fair billing and leak detection for apartment complex.",
-    icon: Building2,
-    image: "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=600",
+    client_name: null,
+    completion_date: null,
+    image_url: "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=600",
+    is_featured: false,
   },
   {
+    id: "4",
     title: "Nakuru Town Council",
     location: "Nakuru County",
-    type: "Municipal",
-    meters: 1200,
-    meterType: "Water",
+    category: "Municipal",
     description: "Large-scale municipal water metering project for improved revenue collection.",
-    icon: Users,
-    image: "https://images.unsplash.com/photo-1464938050520-ef2571a2b3e7?w=600",
+    client_name: null,
+    completion_date: null,
+    image_url: "https://images.unsplash.com/photo-1464938050520-ef2571a2b3e7?w=600",
+    is_featured: false,
   },
   {
+    id: "5",
     title: "Safari Gardens",
     location: "Kisumu County",
-    type: "Residential",
-    meters: 120,
-    meterType: "Electricity",
+    category: "Residential",
     description: "Gated community prepaid electricity solution with mobile app integration.",
-    icon: Home,
-    image: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=600",
+    client_name: null,
+    completion_date: null,
+    image_url: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=600",
+    is_featured: false,
   },
   {
+    id: "6",
     title: "CBD Commercial Complex",
     location: "Nairobi County",
-    type: "Commercial",
-    meters: 75,
-    meterType: "Electricity & Water",
+    category: "Commercial",
     description: "Multi-tenant commercial building with integrated utility management platform.",
-    icon: Building2,
-    image: "https://images.unsplash.com/photo-1497366216548-37526070297c?w=600",
+    client_name: null,
+    completion_date: null,
+    image_url: "https://images.unsplash.com/photo-1497366216548-37526070297c?w=600",
+    is_featured: false,
   },
 ];
 
@@ -91,7 +109,44 @@ const clients = [
   "Property Management Firms", "Industrial Parks", "Shopping Malls", "Hotels"
 ];
 
+const getCategoryIcon = (category: string | null) => {
+  switch (category?.toLowerCase()) {
+    case "residential":
+      return Home;
+    case "commercial":
+      return Building2;
+    case "industrial":
+      return Factory;
+    case "municipal":
+      return Users;
+    default:
+      return FolderOpen;
+  }
+};
+
 export default function Projects() {
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        const { data } = await supabase.from("projects").select("*").order("sort_order");
+        if (data && data.length > 0) {
+          setProjects(data);
+        } else {
+          setProjects(defaultProjects);
+        }
+      } catch (error) {
+        console.error("Error fetching projects:", error);
+        setProjects(defaultProjects);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProjects();
+  }, []);
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
@@ -133,54 +188,64 @@ export default function Projects() {
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {projects.map((project, index) => (
-              <Card key={index} className="overflow-hidden hover:shadow-hover transition-all duration-300 group">
-                <div className="aspect-video relative overflow-hidden">
-                  <img 
-                    src={project.image} 
-                    alt={project.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
-                  <div className="absolute top-4 left-4">
-                    <Badge variant="secondary" className="bg-background/90">
-                      {project.type}
-                    </Badge>
-                  </div>
-                </div>
-                <CardContent className="p-6">
-                  <div className="flex items-start gap-3 mb-3">
-                    <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                      <project.icon className="h-5 w-5 text-primary" />
+            {projects.map((project) => {
+              const CategoryIcon = getCategoryIcon(project.category);
+              return (
+                <Card key={project.id} className="overflow-hidden hover:shadow-hover transition-all duration-300 group">
+                  <div className="aspect-video relative overflow-hidden bg-muted">
+                    {project.image_url ? (
+                      <img 
+                        src={project.image_url} 
+                        alt={project.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <CategoryIcon className="h-16 w-16 text-muted-foreground" />
+                      </div>
+                    )}
+                    <div className="absolute top-4 left-4 flex gap-2">
+                      {project.category && (
+                        <Badge variant="secondary" className="bg-background/90">
+                          {project.category}
+                        </Badge>
+                      )}
+                      {project.is_featured && (
+                        <Badge className="bg-primary">Featured</Badge>
+                      )}
                     </div>
-                    <div>
-                      <h3 className="font-semibold text-lg">{project.title}</h3>
-                      <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                        <MapPin className="h-3 w-3" />
-                        {project.location}
+                  </div>
+                  <CardContent className="p-6">
+                    <div className="flex items-start gap-3 mb-3">
+                      <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                        <CategoryIcon className="h-5 w-5 text-primary" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-lg">{project.title}</h3>
+                        {project.location && (
+                          <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                            <MapPin className="h-3 w-3" />
+                            {project.location}
+                          </div>
+                        )}
                       </div>
                     </div>
-                  </div>
-                  <p className="text-muted-foreground text-sm mb-4">{project.description}</p>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      {project.meterType.includes("Electricity") && (
-                        <Badge variant="outline" className="text-xs">
-                          <Zap className="h-3 w-3 mr-1" />
-                          Electricity
-                        </Badge>
-                      )}
-                      {project.meterType.includes("Water") && (
-                        <Badge variant="outline" className="text-xs">
-                          <Droplets className="h-3 w-3 mr-1" />
-                          Water
-                        </Badge>
-                      )}
-                    </div>
-                    <span className="text-sm font-medium text-primary">{project.meters} meters</span>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                    <p className="text-muted-foreground text-sm mb-4">{project.description}</p>
+                    {project.client_name && (
+                      <p className="text-sm">
+                        <span className="text-muted-foreground">Client:</span>{" "}
+                        <span className="font-medium">{project.client_name}</span>
+                      </p>
+                    )}
+                    {project.completion_date && (
+                      <p className="text-sm text-muted-foreground">
+                        Completed: {new Date(project.completion_date).toLocaleDateString()}
+                      </p>
+                    )}
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
         </div>
       </section>
