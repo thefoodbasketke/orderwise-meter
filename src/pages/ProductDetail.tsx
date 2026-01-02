@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
-import { Package, MessageSquare, ShoppingCart, ArrowLeft, FileText, Download } from "lucide-react";
+import { Package, MessageSquare, ShoppingCart, ArrowLeft, FileText, Download, MessageCircle } from "lucide-react";
 import { z } from "zod";
 
 interface Product {
@@ -318,6 +318,32 @@ export default function ProductDetail() {
                 </a>
               </div>
             )}
+
+            {/* WhatsApp Buttons */}
+            <div className="flex gap-3 mb-6">
+              <a
+                href={`https://wa.me/254700444448?text=${encodeURIComponent(`Hi, I'd like to order: ${product.name} (KSh ${product.base_price.toLocaleString()})`)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex-1"
+              >
+                <Button className="w-full bg-green-600 hover:bg-green-700">
+                  <MessageCircle className="h-4 w-4 mr-2" />
+                  Order via WhatsApp
+                </Button>
+              </a>
+              <a
+                href={`https://wa.me/254700444448?text=${encodeURIComponent(`Hi, I'd like to enquire about: ${product.name}`)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex-1"
+              >
+                <Button variant="outline" className="w-full">
+                  <MessageCircle className="h-4 w-4 mr-2" />
+                  Enquire via WhatsApp
+                </Button>
+              </a>
+            </div>
 
             {!user ? (
               <Card>
