@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
-import { ShoppingCart, User, LogOut, LayoutDashboard, Menu, ChevronDown } from "lucide-react";
+import { ShoppingCart, User, LogOut, LayoutDashboard, Menu, ChevronDown, ExternalLink, Key, Building2 } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -67,6 +67,28 @@ export function Navbar() {
                 ))}
               </DropdownMenuContent>
             </DropdownMenu>
+
+            {/* External Portal Buttons */}
+            <a
+              href="https://vendsolid.umskenya.com/tknverify"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <Button variant="outline" size="sm" className="bg-primary/10">
+                <Key className="mr-1 h-4 w-4" />
+                Retrieve Tokens
+              </Button>
+            </a>
+            <a
+              href="https://customer.umskenya.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <Button variant="outline" size="sm" className="bg-primary/10">
+                <Building2 className="mr-1 h-4 w-4" />
+                Landlords Portal
+              </Button>
+            </a>
           </div>
 
           <div className="flex items-center space-x-2">
@@ -145,6 +167,29 @@ export function Navbar() {
                         {link.label}
                       </Link>
                     ))}
+                  </div>
+                  <div className="border-t pt-4 mt-2">
+                    <p className="text-sm text-muted-foreground mb-3">Quick Links</p>
+                    <a
+                      href="https://vendsolid.umskenya.com/tknverify"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center py-2 text-sm hover:text-primary"
+                    >
+                      <Key className="mr-2 h-4 w-4" />
+                      Retrieve Tokens
+                      <ExternalLink className="ml-auto h-3 w-3" />
+                    </a>
+                    <a
+                      href="https://customer.umskenya.com/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center py-2 text-sm hover:text-primary"
+                    >
+                      <Building2 className="mr-2 h-4 w-4" />
+                      Landlords Portal
+                      <ExternalLink className="ml-auto h-3 w-3" />
+                    </a>
                   </div>
                 </div>
               </SheetContent>
