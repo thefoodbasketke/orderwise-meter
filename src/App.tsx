@@ -37,6 +37,7 @@ import AdminMeterRegistrations from "./pages/admin/MeterRegistrations";
 import AdminQuoteRequests from "./pages/admin/QuoteRequests";
 
 import { ProtectedRoute } from "./components/ProtectedRoute";
+import { WhatsAppFloat } from "./components/WhatsAppFloat";
 
 const queryClient = new QueryClient();
 
@@ -85,6 +86,7 @@ const App = () => (
               <Route path="*" element={<NotFound />} />
             </Routes>
           </AnimatePresence>
+          <WhatsAppFloat />
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
