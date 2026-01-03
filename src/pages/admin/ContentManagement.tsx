@@ -86,8 +86,10 @@ interface HeroBanner {
   image_url: string | null;
   is_active: boolean;
 }
+
+export default function ContentManagement() {
   const { toast } = useToast();
-  const [activeTab, setActiveTab] = useState("about");
+  const [activeTab, setActiveTab] = useState("hero");
   
   // State for each content type
   const [siteContent, setSiteContent] = useState<SiteContent[]>([]);
@@ -95,7 +97,9 @@ interface HeroBanner {
   const [services, setServices] = useState<Service[]>([]);
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
   const [careers, setCareers] = useState<Career[]>([]);
+  const [heroBanner, setHeroBanner] = useState<HeroBanner | null>(null);
   const [loading, setLoading] = useState(true);
+  const [uploadingImage, setUploadingImage] = useState(false);
 
   // Dialog states
   const [editingContent, setEditingContent] = useState<SiteContent | null>(null);
