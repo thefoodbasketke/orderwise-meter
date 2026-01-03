@@ -12,7 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Edit, Trash2, ArrowLeft, FileText, Briefcase, Star, FolderOpen, Settings } from "lucide-react";
+import { Plus, Edit, Trash2, ArrowLeft, FileText, Briefcase, Star, FolderOpen, Settings, Image, Upload } from "lucide-react";
 import { Link } from "react-router-dom";
 
 // Types
@@ -78,7 +78,14 @@ interface Career {
   application_deadline: string | null;
 }
 
-export default function ContentManagement() {
+interface HeroBanner {
+  id: string;
+  title: string | null;
+  subtitle: string | null;
+  description: string | null;
+  image_url: string | null;
+  is_active: boolean;
+}
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("about");
   
@@ -104,12 +111,13 @@ export default function ContentManagement() {
 
   const fetchAllContent = async () => {
     try {
-      const [contentRes, projectsRes, servicesRes, testimonialsRes, careersRes] = await Promise.all([
+      const [contentRes, projectsRes, servicesRes, testimonialsRes, careersRes, heroRes] = await Promise.all([
         supabase.from("site_content").select("*").order("sort_order"),
         supabase.from("projects").select("*").order("sort_order"),
         supabase.from("services").select("*").order("sort_order"),
         supabase.from("testimonials").select("*").order("sort_order"),
         supabase.from("careers").select("*").order("created_at", { ascending: false }),
+        supabase.from("hero_banners").select("*").order("updated_at", { ascending: false }).limit(1).single(),
       ]);
 
       if (contentRes.data) setSiteContent(contentRes.data);
@@ -117,10 +125,70 @@ export default function ContentManagement() {
       if (servicesRes.data) setServices(servicesRes.data);
       if (testimonialsRes.data) setTestimonials(testimonialsRes.data);
       if (careersRes.data) setCareers(careersRes.data);
+      if (heroRes.data) setHeroBanner(heroRes.data);
     } catch (error: any) {
       toast({ variant: "destructive", title: "Error", description: "Failed to load content" });
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Hero Banner handlers
+  const handleHeroImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingImage(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `hero-${Date.now()}.${fileExt}`;
+      
+      const { error: uploadError } = await supabase.storage
+        .from('hero-images')
+        .upload(fileName, file, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('hero-images')
+        .getPublicUrl(fileName);
+
+      // Update or create hero banner
+      if (heroBanner?.id) {
+        await supabase.from("hero_banners").update({ image_url: publicUrl }).eq("id", heroBanner.id);
+      } else {
+        await supabase.from("hero_banners").insert({ image_url: publicUrl, is_active: true });
+      }
+
+      toast({ title: "Success", description: "Hero image uploaded" });
+      fetchAllContent();
+    } catch (error: any) {
+      toast({ variant: "destructive", title: "Error", description: error.message });
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
+  const handleSaveHeroBanner = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const data = {
+      title: formData.get("title") as string || null,
+      subtitle: formData.get("subtitle") as string || null,
+      description: formData.get("description") as string || null,
+      is_active: heroBanner?.is_active ?? true,
+    };
+
+    try {
+      if (heroBanner?.id) {
+        await supabase.from("hero_banners").update(data).eq("id", heroBanner.id);
+      } else {
+        await supabase.from("hero_banners").insert({ ...data, is_active: true });
+      }
+      toast({ title: "Success", description: "Hero banner saved" });
+      fetchAllContent();
+    } catch (error: any) {
+      toast({ variant: "destructive", title: "Error", description: error.message });
     }
   };
 
@@ -323,13 +391,109 @@ export default function ContentManagement() {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="mb-6">
+          <TabsList className="mb-6 flex-wrap">
+            <TabsTrigger value="hero"><Image className="h-4 w-4 mr-1" />Hero Banner</TabsTrigger>
             <TabsTrigger value="about"><Settings className="h-4 w-4 mr-1" />About</TabsTrigger>
             <TabsTrigger value="projects"><FolderOpen className="h-4 w-4 mr-1" />Projects</TabsTrigger>
             <TabsTrigger value="services"><FileText className="h-4 w-4 mr-1" />Services</TabsTrigger>
             <TabsTrigger value="testimonials"><Star className="h-4 w-4 mr-1" />Testimonials</TabsTrigger>
             <TabsTrigger value="careers"><Briefcase className="h-4 w-4 mr-1" />Careers</TabsTrigger>
           </TabsList>
+
+          {/* Hero Banner Tab */}
+          <TabsContent value="hero">
+            <Card>
+              <CardHeader>
+                <CardTitle>Homepage Hero Banner</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Current Hero Image Preview */}
+                <div className="space-y-4">
+                  <Label className="text-base font-semibold">Hero Background Image</Label>
+                  {heroBanner?.image_url ? (
+                    <div className="relative aspect-video w-full max-w-2xl rounded-lg overflow-hidden border">
+                      <img 
+                        src={heroBanner.image_url} 
+                        alt="Hero Banner" 
+                        className="w-full h-full object-cover"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-r from-primary/60 to-transparent" />
+                    </div>
+                  ) : (
+                    <div className="aspect-video w-full max-w-2xl rounded-lg border-2 border-dashed flex items-center justify-center bg-muted/50">
+                      <p className="text-muted-foreground">No hero image uploaded</p>
+                    </div>
+                  )}
+                  
+                  {/* Image Upload */}
+                  <div className="flex items-center gap-4">
+                    <Label 
+                      htmlFor="hero-image-upload" 
+                      className="cursor-pointer inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
+                    >
+                      <Upload className="h-4 w-4" />
+                      {uploadingImage ? "Uploading..." : "Upload HD Image"}
+                    </Label>
+                    <input 
+                      id="hero-image-upload" 
+                      type="file" 
+                      accept="image/*" 
+                      className="hidden" 
+                      onChange={handleHeroImageUpload}
+                      disabled={uploadingImage}
+                    />
+                    <span className="text-sm text-muted-foreground">
+                      Recommended: 1920x1080 or higher for HD quality
+                    </span>
+                  </div>
+                </div>
+
+                {/* Hero Text Content */}
+                <form onSubmit={handleSaveHeroBanner} className="space-y-4 pt-4 border-t">
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div>
+                      <Label>Main Title</Label>
+                      <Input 
+                        name="title" 
+                        defaultValue={heroBanner?.title || ""} 
+                        placeholder="Utility Metering Solutions"
+                      />
+                    </div>
+                    <div>
+                      <Label>Subtitle / Badge Text</Label>
+                      <Input 
+                        name="subtitle" 
+                        defaultValue={heroBanner?.subtitle || ""} 
+                        placeholder="Kenya's Trusted Meter Supplier"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <Label>Description</Label>
+                    <Textarea 
+                      name="description" 
+                      defaultValue={heroBanner?.description || ""} 
+                      rows={3}
+                      placeholder="Premium prepaid electricity, water, and gas meters..."
+                    />
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <Switch 
+                      checked={heroBanner?.is_active ?? true} 
+                      onCheckedChange={async (checked) => {
+                        if (heroBanner?.id) {
+                          await supabase.from("hero_banners").update({ is_active: checked }).eq("id", heroBanner.id);
+                          fetchAllContent();
+                        }
+                      }}
+                    />
+                    <Label>Banner Active</Label>
+                  </div>
+                  <Button type="submit">Save Hero Content</Button>
+                </form>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
           {/* About/Site Content Tab */}
           <TabsContent value="about">
