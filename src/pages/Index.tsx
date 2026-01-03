@@ -1,5 +1,7 @@
 import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
@@ -20,9 +22,21 @@ import {
   Award,
   Building2,
   Wrench,
-  HeadphonesIcon
+  HeadphonesIcon,
+  ExternalLink,
+  Coins,
+  Home
 } from "lucide-react";
 import umsLogo from "@/assets/ums-logo.png";
+
+interface HeroBanner {
+  id: string;
+  title: string | null;
+  subtitle: string | null;
+  description: string | null;
+  image_url: string | null;
+  is_active: boolean;
+}
 
 const stats = [
   { value: "10K+", label: "Meters Installed", icon: Zap },
@@ -90,41 +104,96 @@ const features = [
 
 export default function Index() {
   const { user } = useAuth();
+  const [heroBanner, setHeroBanner] = useState<HeroBanner | null>(null);
+
+  useEffect(() => {
+    const fetchHeroBanner = async () => {
+      const { data } = await supabase
+        .from("hero_banners")
+        .select("*")
+        .eq("is_active", true)
+        .order("updated_at", { ascending: false })
+        .limit(1)
+        .single();
+      if (data) setHeroBanner(data);
+    };
+    fetchHeroBanner();
+  }, []);
 
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
       
       {/* Hero Section */}
-      <section className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-hero"></div>
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg%20width%3D%2260%22%20height%3D%2260%22%20viewBox%3D%220%200%2060%2060%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cg%20fill%3D%22none%22%20fill-rule%3D%22evenodd%22%3E%3Cg%20fill%3D%22%23ffffff%22%20fill-opacity%3D%220.05%22%3E%3Cpath%20d%3D%22M36%2034v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6%2034v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6%204V0H4v4H0v2h4v4h2V6h4V4H6z%22%2F%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fsvg%3E')] opacity-30"></div>
+      <section className="relative overflow-hidden min-h-[600px]">
+        {/* Background Image or Gradient */}
+        {heroBanner?.image_url ? (
+          <>
+            <div 
+              className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+              style={{ backgroundImage: `url(${heroBanner.image_url})` }}
+            />
+            <div className="absolute inset-0 bg-gradient-to-r from-primary/90 via-primary/70 to-primary/50" />
+          </>
+        ) : (
+          <>
+            <div className="absolute inset-0 bg-gradient-hero"></div>
+            <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg%20width%3D%2260%22%20height%3D%2260%22%20viewBox%3D%220%200%2060%2060%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cg%20fill%3D%22none%22%20fill-rule%3D%22evenodd%22%3E%3Cg%20fill%3D%22%23ffffff%22%20fill-opacity%3D%220.05%22%3E%3Cpath%20d%3D%22M36%2034v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6%2034v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6%204V0H4v4H0v2h4v4h2V6h4V4H6z%22%2F%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fsvg%3E')] opacity-30"></div>
+          </>
+        )}
         
         <div className="container relative mx-auto px-4 py-20 md:py-32">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="text-left">
               <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 mb-6">
                 <span className="text-primary-foreground/90 text-sm font-medium">
-                  Kenya's Trusted Meter Supplier
+                  {heroBanner?.subtitle || "Kenya's Trusted Meter Supplier"}
                 </span>
               </div>
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-primary-foreground mb-6 leading-tight">
-                Utility Metering Solutions
+                {heroBanner?.title || "Utility Metering Solutions"}
               </h1>
               <p className="text-lg md:text-xl text-primary-foreground/85 mb-8 max-w-xl">
-                Premium prepaid electricity, water, and gas meters with flexible pricing, 
-                secure M-Pesa payments, and nationwide delivery.
+                {heroBanner?.description || "Premium prepaid electricity, water, and gas meters with flexible pricing, secure M-Pesa payments, and nationwide delivery."}
               </p>
+              
+              {/* External Portal Buttons */}
+              <div className="flex flex-col sm:flex-row gap-4 mb-6">
+                <a 
+                  href="https://vendsolid.umskenya.com/tknverify" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                >
+                  <Button size="lg" variant="secondary" className="shadow-lg group w-full sm:w-auto">
+                    <Coins className="mr-2 h-5 w-5" />
+                    Retrieve Tokens
+                    <ExternalLink className="ml-2 h-4 w-4 opacity-70" />
+                  </Button>
+                </a>
+                <a 
+                  href="https://customer.umskenya.com/" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                >
+                  <Button size="lg" variant="outline" className="bg-white/10 text-primary-foreground border-white/20 hover:bg-white/20 w-full sm:w-auto">
+                    <Home className="mr-2 h-5 w-5" />
+                    Landlords Portal
+                    <ExternalLink className="ml-2 h-4 w-4 opacity-70" />
+                  </Button>
+                </a>
+              </div>
+              
+              {/* Secondary Actions */}
               <div className="flex flex-col sm:flex-row gap-4">
                 <Link to="/products">
-                  <Button size="lg" variant="secondary" className="shadow-lg group">
+                  <Button size="lg" variant="ghost" className="text-primary-foreground hover:bg-white/10 border border-white/20">
                     Browse Products
-                    <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                    <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
                 </Link>
                 {!user && (
                   <Link to="/auth">
-                    <Button size="lg" variant="outline" className="bg-white/10 text-primary-foreground border-white/20 hover:bg-white/20">
+                    <Button size="lg" variant="ghost" className="text-primary-foreground hover:bg-white/10">
                       Create Account
                     </Button>
                   </Link>
