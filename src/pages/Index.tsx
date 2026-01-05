@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -25,7 +25,9 @@ import {
   HeadphonesIcon,
   ExternalLink,
   Coins,
-  Home
+  Home,
+  ChevronLeft,
+  ChevronRight
 } from "lucide-react";
 import umsLogo from "@/assets/ums-logo.png";
 
@@ -105,21 +107,39 @@ const features = [
 
 export default function Index() {
   const { user } = useAuth();
-  const [heroBanner, setHeroBanner] = useState<HeroBanner | null>(null);
+  const [heroBanners, setHeroBanners] = useState<HeroBanner[]>([]);
+  const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
 
   useEffect(() => {
-    const fetchHeroBanner = async () => {
+    const fetchHeroBanners = async () => {
       const { data } = await supabase
         .from("hero_banners")
         .select("*")
         .eq("is_active", true)
-        .order("updated_at", { ascending: false })
-        .limit(1)
-        .single();
-      if (data) setHeroBanner(data);
+        .order("updated_at", { ascending: false });
+      if (data && data.length > 0) setHeroBanners(data);
     };
-    fetchHeroBanner();
+    fetchHeroBanners();
   }, []);
+
+  // Auto-rotate banners every 6 seconds
+  useEffect(() => {
+    if (heroBanners.length <= 1) return;
+    const interval = setInterval(() => {
+      setCurrentBannerIndex((prev) => (prev + 1) % heroBanners.length);
+    }, 6000);
+    return () => clearInterval(interval);
+  }, [heroBanners.length]);
+
+  const goToPrevBanner = useCallback(() => {
+    setCurrentBannerIndex((prev) => (prev - 1 + heroBanners.length) % heroBanners.length);
+  }, [heroBanners.length]);
+
+  const goToNextBanner = useCallback(() => {
+    setCurrentBannerIndex((prev) => (prev + 1) % heroBanners.length);
+  }, [heroBanners.length]);
+
+  const currentBanner = heroBanners[currentBannerIndex] || null;
 
   return (
     <div className="min-h-screen bg-background">
@@ -128,24 +148,26 @@ export default function Index() {
       {/* Hero Section */}
       <section className="relative overflow-hidden min-h-[600px]">
         {/* Background Video, Image or Gradient */}
-        {heroBanner?.video_url ? (
+        {currentBanner?.video_url ? (
           <>
             <video
+              key={currentBanner.id + '-video'}
               autoPlay
               muted
               loop
               playsInline
-              className="absolute inset-0 w-full h-full object-cover"
+              className="absolute inset-0 w-full h-full object-cover transition-opacity duration-700"
             >
-              <source src={heroBanner.video_url} type="video/mp4" />
+              <source src={currentBanner.video_url} type="video/mp4" />
             </video>
             <div className="absolute inset-0 bg-gradient-to-r from-primary/90 via-primary/70 to-primary/50" />
           </>
-        ) : heroBanner?.image_url ? (
+        ) : currentBanner?.image_url ? (
           <>
             <div 
-              className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-              style={{ backgroundImage: `url(${heroBanner.image_url})` }}
+              key={currentBanner.id + '-image'}
+              className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-opacity duration-700"
+              style={{ backgroundImage: `url(${currentBanner.image_url})` }}
             />
             <div className="absolute inset-0 bg-gradient-to-r from-primary/90 via-primary/70 to-primary/50" />
           </>
@@ -155,20 +177,55 @@ export default function Index() {
             <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg%20width%3D%2260%22%20height%3D%2260%22%20viewBox%3D%220%200%2060%2060%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cg%20fill%3D%22none%22%20fill-rule%3D%22evenodd%22%3E%3Cg%20fill%3D%22%23ffffff%22%20fill-opacity%3D%220.05%22%3E%3Cpath%20d%3D%22M36%2034v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6%2034v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6%204V0H4v4H0v2h4v4h2V6h4V4H6z%22%2F%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fsvg%3E')] opacity-30"></div>
           </>
         )}
+
+        {/* Carousel Navigation */}
+        {heroBanners.length > 1 && (
+          <>
+            <button
+              onClick={goToPrevBanner}
+              className="absolute left-4 top-1/2 -translate-y-1/2 z-10 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-full p-2 text-primary-foreground transition-colors"
+              aria-label="Previous banner"
+            >
+              <ChevronLeft className="h-6 w-6" />
+            </button>
+            <button
+              onClick={goToNextBanner}
+              className="absolute right-4 top-1/2 -translate-y-1/2 z-10 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-full p-2 text-primary-foreground transition-colors"
+              aria-label="Next banner"
+            >
+              <ChevronRight className="h-6 w-6" />
+            </button>
+            {/* Dots indicator */}
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 flex gap-2">
+              {heroBanners.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => setCurrentBannerIndex(index)}
+                  className={`w-2.5 h-2.5 rounded-full transition-all ${
+                    index === currentBannerIndex 
+                      ? 'bg-white w-8' 
+                      : 'bg-white/50 hover:bg-white/75'
+                  }`}
+                  aria-label={`Go to banner ${index + 1}`}
+                />
+              ))}
+            </div>
+          </>
+        )}
         
         <div className="container relative mx-auto px-4 py-20 md:py-32">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="text-left">
               <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 mb-6">
                 <span className="text-primary-foreground/90 text-sm font-medium">
-                  {heroBanner?.subtitle || "Kenya's Trusted Meter Supplier"}
+                  {currentBanner?.subtitle || "Kenya's Trusted Meter Supplier"}
                 </span>
               </div>
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-primary-foreground mb-6 leading-tight">
-                {heroBanner?.title || "Utility Metering Solutions"}
+                {currentBanner?.title || "Utility Metering Solutions"}
               </h1>
               <p className="text-lg md:text-xl text-primary-foreground/85 mb-8 max-w-xl">
-                {heroBanner?.description || "Premium prepaid electricity, water, and gas meters with flexible pricing, secure M-Pesa payments, and nationwide delivery."}
+                {currentBanner?.description || "Premium prepaid electricity, water, and gas meters with flexible pricing, secure M-Pesa payments, and nationwide delivery."}
               </p>
               
               {/* External Portal Buttons */}
