@@ -19,8 +19,12 @@ import {
   Send,
   CheckCircle2,
   Plus,
-  Trash2
+  Trash2,
+  FileText,
+  ChevronDown,
+  ChevronUp
 } from "lucide-react";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { z } from "zod";
 
 const registerSchema = z.object({
@@ -34,7 +38,23 @@ const registerSchema = z.object({
   receiptNumber: z.string().optional(),
   extendedWarranty: z.boolean(),
   notes: z.string().optional(),
+  termsAccepted: z.literal(true, { errorMap: () => ({ message: "You must accept the terms and conditions" }) }),
 });
+
+const termsAndConditions = [
+  "This is a secondary meter and not a replacement for the main utility meter hence must be supplied from the main meter.",
+  "The customer shall engage a qualified licensed technician to install the UMS meters and is fully responsible for the installation of these meters. A list of licensed electricians can be found on the EPRA website on www.epra.go.ke",
+  "UMS provides a two-year (2-yr) warranty on all meters effective from the date of installation. During this period, the Customer must report any meter malfunctions promptly to UMS for troubleshooting or free replacement. However, if a fault is determined to be caused by customer mishandling or tampering, the Customer shall assume full responsibility for all associated repair or replacement costs.",
+  "For KPLC postpaid accounts, the Customer shall share a digital photo of the current meter readings to ensure the accurate capture of the mother meter's consumption data. Additionally, the Customer agrees to provide a clear digital photo of the installed meters to UMS prior to the commissioning of the system.",
+  "The customer is responsible for any unbilled units registered by the main meter which could arise from connecting directly from main meter bypassing the sub meters.",
+  "Tokens shall be charged at the prevailing tariff approved by EPRA, check www.stimatracker.com",
+  "UMS shall charge a service fee of 10% for token generation and administration on the total tokens unless advised otherwise by the landlord it shall be deducted to customers as meter vends.",
+  "Depending on the agreement with the Landlord for the postpaid account, UMS shall ensure all funds received are paid to the utility provider twice monthly, specifically on the 15th and the last day of every month. Evidence of these payments shall be shared with the Landlord following each transaction.",
+  "For the prepaid account, the Landlord shall provide a one-time initial deposit of KSh 1,500 into their KPLC account to ensure uninterrupted utility service. Thereafter, UMS shall monitor the account and remit collected funds to purchase subsequent tokens once the collected balance reaches a minimum threshold of KSh 1,000. All purchased tokens will be delivered via SMS to the Landlord's registered phone number or their authorized representatives.",
+  "UMS is not liable for any loss, damage, or inconvenience caused by factors beyond its control, including but not limited to natural disasters, power outages/surge, or M-pesa outage.",
+  "Upon meter registration, UMS shall provide the Landlord with access to a dedicated customer portal via https://customer.umskenya.com. Through this portal, the Landlord may view and download all transaction records, including daily, weekly, and monthly statements. Additionally, UMS shall deliver a monthly summary statement via SMS to the Landlord's registered phone number.",
+  "UMS offer metering solution and hence is not a utility provider.",
+];
 
 const benefits = [
   "Activate your manufacturer warranty",
@@ -55,7 +75,9 @@ export default function RegisterMeter() {
     receiptNumber: "",
     extendedWarranty: false,
     notes: "",
+    termsAccepted: false,
   });
+  const [showTerms, setShowTerms] = useState(false);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
@@ -95,6 +117,8 @@ export default function RegisterMeter() {
         receipt_number: formData.receiptNumber || null,
         warranty_extended: formData.extendedWarranty,
         notes: formData.notes || null,
+        terms_accepted: formData.termsAccepted,
+        terms_accepted_at: new Date().toISOString(),
       });
 
       if (error) throw error;
@@ -115,6 +139,7 @@ export default function RegisterMeter() {
         receiptNumber: "",
         extendedWarranty: false,
         notes: "",
+        termsAccepted: false,
       });
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -345,7 +370,7 @@ export default function RegisterMeter() {
                           Warranty Registration
                         </div>
                         <p className="text-sm text-muted-foreground">
-                          Your standard 1-year warranty will be automatically activated upon registration.
+                          Your standard 2-year warranty will be automatically activated upon registration.
                         </p>
                         <div className="flex items-center space-x-2">
                           <Checkbox
@@ -357,6 +382,60 @@ export default function RegisterMeter() {
                           />
                           <Label htmlFor="extendedWarranty" className="text-sm cursor-pointer">
                             I'm interested in extended warranty options (our team will contact you)
+                          </Label>
+                        </div>
+                      </div>
+
+                      {/* Terms and Conditions */}
+                      <div className="space-y-4 border-t pt-6">
+                        <div className="flex items-center gap-2 text-lg font-semibold">
+                          <FileText className="h-5 w-5 text-primary" />
+                          Terms and Conditions *
+                        </div>
+                        
+                        <div className="border rounded-lg">
+                          <button
+                            type="button"
+                            onClick={() => setShowTerms(!showTerms)}
+                            className="w-full flex items-center justify-between p-4 text-left hover:bg-muted/50 transition-colors"
+                          >
+                            <span className="font-medium">View Terms and Conditions</span>
+                            {showTerms ? (
+                              <ChevronUp className="h-5 w-5 text-muted-foreground" />
+                            ) : (
+                              <ChevronDown className="h-5 w-5 text-muted-foreground" />
+                            )}
+                          </button>
+                          
+                          {showTerms && (
+                            <div className="border-t">
+                              <ScrollArea className="h-64 p-4">
+                                <div className="space-y-4">
+                                  <p className="text-sm font-medium">
+                                    These terms and conditions ("Terms") outline the agreement between UMS and the property owner or occupant ("Customer") for the installation of submeters.
+                                  </p>
+                                  <ol className="list-decimal pl-5 space-y-3 text-sm text-muted-foreground">
+                                    {termsAndConditions.map((term, index) => (
+                                      <li key={index}>{term}</li>
+                                    ))}
+                                  </ol>
+                                </div>
+                              </ScrollArea>
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="flex items-start space-x-2">
+                          <Checkbox
+                            id="termsAccepted"
+                            checked={formData.termsAccepted}
+                            onCheckedChange={(checked) => 
+                              setFormData({ ...formData, termsAccepted: checked as boolean })
+                            }
+                            className="mt-0.5"
+                          />
+                          <Label htmlFor="termsAccepted" className="text-sm cursor-pointer leading-relaxed">
+                            I have read and agree to the <button type="button" onClick={() => setShowTerms(true)} className="text-primary underline hover:text-primary/80">Terms and Conditions</button> for UMS meter registration and installation
                           </Label>
                         </div>
                       </div>

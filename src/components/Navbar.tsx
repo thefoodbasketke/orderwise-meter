@@ -68,27 +68,6 @@ export function Navbar() {
               </DropdownMenuContent>
             </DropdownMenu>
 
-            {/* External Portal Buttons */}
-            <a
-              href="https://vendsolid.umskenya.com/tknverify"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <Button variant="outline" size="sm" className="bg-primary/10">
-                <Key className="mr-1 h-4 w-4" />
-                Retrieve Tokens
-              </Button>
-            </a>
-            <a
-              href="https://customer.umskenya.com/"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <Button variant="outline" size="sm" className="bg-primary/10">
-                <Building2 className="mr-1 h-4 w-4" />
-                Landlords Portal
-              </Button>
-            </a>
           </div>
 
           <div className="flex items-center space-x-2">

@@ -131,6 +131,7 @@ export type Database = {
           subtitle: string | null
           title: string | null
           updated_at: string
+          video_url: string | null
         }
         Insert: {
           created_at?: string
@@ -141,6 +142,7 @@ export type Database = {
           subtitle?: string | null
           title?: string | null
           updated_at?: string
+          video_url?: string | null
         }
         Update: {
           created_at?: string
@@ -151,6 +153,7 @@ export type Database = {
           subtitle?: string | null
           title?: string | null
           updated_at?: string
+          video_url?: string | null
         }
         Relationships: []
       }
@@ -167,6 +170,8 @@ export type Database = {
           purchase_date: string | null
           purchase_location: string | null
           receipt_number: string | null
+          terms_accepted: boolean | null
+          terms_accepted_at: string | null
           warranty_extended: boolean | null
         }
         Insert: {
@@ -181,6 +186,8 @@ export type Database = {
           purchase_date?: string | null
           purchase_location?: string | null
           receipt_number?: string | null
+          terms_accepted?: boolean | null
+          terms_accepted_at?: string | null
           warranty_extended?: boolean | null
         }
         Update: {
@@ -195,6 +202,8 @@ export type Database = {
           purchase_date?: string | null
           purchase_location?: string | null
           receipt_number?: string | null
+          terms_accepted?: boolean | null
+          terms_accepted_at?: string | null
           warranty_extended?: boolean | null
         }
         Relationships: []

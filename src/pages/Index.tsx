@@ -35,6 +35,7 @@ interface HeroBanner {
   subtitle: string | null;
   description: string | null;
   image_url: string | null;
+  video_url: string | null;
   is_active: boolean;
 }
 
@@ -126,8 +127,21 @@ export default function Index() {
       
       {/* Hero Section */}
       <section className="relative overflow-hidden min-h-[600px]">
-        {/* Background Image or Gradient */}
-        {heroBanner?.image_url ? (
+        {/* Background Video, Image or Gradient */}
+        {heroBanner?.video_url ? (
+          <>
+            <video
+              autoPlay
+              muted
+              loop
+              playsInline
+              className="absolute inset-0 w-full h-full object-cover"
+            >
+              <source src={heroBanner.video_url} type="video/mp4" />
+            </video>
+            <div className="absolute inset-0 bg-gradient-to-r from-primary/90 via-primary/70 to-primary/50" />
+          </>
+        ) : heroBanner?.image_url ? (
           <>
             <div 
               className="absolute inset-0 bg-cover bg-center bg-no-repeat"
