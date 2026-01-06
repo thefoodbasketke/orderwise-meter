@@ -22,9 +22,10 @@ interface Product {
 
 const categories = [
   { value: "all", label: "All Products", icon: Grid3X3 },
-  { value: "Electricity Meters", label: "Electricity", icon: Zap },
-  { value: "Water Meters", label: "Water", icon: Droplets },
-  { value: "Gas Meters", label: "Gas", icon: Flame },
+  { value: "SINGLE PHASE METERS", label: "Single Phase", icon: Zap },
+  { value: "3 PHASE METERS", label: "3 Phase", icon: Zap },
+  { value: "WATER METERS", label: "Water", icon: Droplets },
+  { value: "GAS METERS", label: "Gas", icon: Flame },
 ];
 
 export default function Products() {
