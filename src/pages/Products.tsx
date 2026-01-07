@@ -9,7 +9,8 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { ProductQuickView } from "@/components/ProductQuickView";
-import { Package, Search, Filter, Zap, Droplets, Flame, Grid3X3, MessageCircle, Eye } from "lucide-react";
+import { CompareProvider, CompareButton, CompareDrawer } from "@/components/CompareProducts";
+import { Package, Search, Filter, Zap, Droplets, Flame, Grid3X3, MessageCircle, Eye, Scale } from "lucide-react";
 
 interface Product {
   id: string;
@@ -101,6 +102,60 @@ export default function Products() {
   }
 
   return (
+    <CompareProvider>
+      <ProductsContent
+        loading={loading}
+        products={products}
+        filteredProducts={filteredProducts}
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        selectedCategory={selectedCategory}
+        setSelectedCategory={setSelectedCategory}
+        quickViewProduct={quickViewProduct}
+        setQuickViewProduct={setQuickViewProduct}
+      />
+    </CompareProvider>
+  );
+}
+
+interface ProductsContentProps {
+  loading: boolean;
+  products: Product[];
+  filteredProducts: Product[];
+  searchQuery: string;
+  setSearchQuery: (query: string) => void;
+  selectedCategory: string;
+  setSelectedCategory: (category: string) => void;
+  quickViewProduct: Product | null;
+  setQuickViewProduct: (product: Product | null) => void;
+}
+
+function ProductsContent({
+  loading,
+  products,
+  filteredProducts,
+  searchQuery,
+  setSearchQuery,
+  selectedCategory,
+  setSelectedCategory,
+  quickViewProduct,
+  setQuickViewProduct,
+}: ProductsContentProps) {
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <div className="container mx-auto px-4 py-12">
+          <div className="text-center">
+            <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent mx-auto mb-4"></div>
+            <p className="text-muted-foreground">Loading products...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
     <div className="min-h-screen bg-background">
       <Navbar />
 
@@ -144,10 +199,16 @@ export default function Products() {
           </div>
         </div>
 
-        {/* Results count */}
-        <p className="text-sm text-muted-foreground mb-6">
-          Showing {filteredProducts.length} of {products.length} products
-        </p>
+        {/* Results count and compare hint */}
+        <div className="flex items-center justify-between mb-6">
+          <p className="text-sm text-muted-foreground">
+            Showing {filteredProducts.length} of {products.length} products
+          </p>
+          <p className="text-sm text-muted-foreground flex items-center gap-1">
+            <Scale className="h-4 w-4" />
+            Click compare icon to select products
+          </p>
+        </div>
 
         {filteredProducts.length === 0 ? (
           <Card className="text-center py-12">
@@ -174,16 +235,20 @@ export default function Products() {
                         <Package className="h-16 w-16 text-muted-foreground" />
                       </div>
                     )}
-                    {/* Quick View Button */}
-                    <Button
-                      size="sm"
-                      variant="secondary"
-                      className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                      onClick={() => setQuickViewProduct(product)}
-                    >
-                      <Eye className="h-4 w-4 mr-1" />
-                      Quick View
-                    </Button>
+                    {/* Quick View & Compare Buttons */}
+                    <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        onClick={() => setQuickViewProduct(product)}
+                      >
+                        <Eye className="h-4 w-4 mr-1" />
+                        Quick View
+                      </Button>
+                    </div>
+                    <div className="absolute top-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <CompareButton product={product} />
+                    </div>
                   </div>
                 </CardHeader>
                 <CardContent className="p-4">
@@ -248,6 +313,9 @@ export default function Products() {
         open={!!quickViewProduct}
         onOpenChange={(open) => !open && setQuickViewProduct(null)}
       />
+
+      {/* Compare Drawer */}
+      <CompareDrawer />
 
       <Footer />
     </div>
