@@ -5,10 +5,11 @@ import { useAuth } from "@/hooks/useAuth";
 interface ProtectedRouteProps {
   children: React.ReactNode;
   requireAdmin?: boolean;
+  requireAdminOrHR?: boolean;
 }
 
-export function ProtectedRoute({ children, requireAdmin = false }: ProtectedRouteProps) {
-  const { user, isAdmin, loading } = useAuth();
+export function ProtectedRoute({ children, requireAdmin = false, requireAdminOrHR = false }: ProtectedRouteProps) {
+  const { user, isAdmin, isHR, loading } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -17,9 +18,11 @@ export function ProtectedRoute({ children, requireAdmin = false }: ProtectedRout
         navigate("/auth");
       } else if (requireAdmin && !isAdmin) {
         navigate("/");
+      } else if (requireAdminOrHR && !isAdmin && !isHR) {
+        navigate("/");
       }
     }
-  }, [user, isAdmin, loading, navigate, requireAdmin]);
+  }, [user, isAdmin, isHR, loading, navigate, requireAdmin, requireAdminOrHR]);
 
   if (loading) {
     return (
@@ -32,7 +35,7 @@ export function ProtectedRoute({ children, requireAdmin = false }: ProtectedRout
     );
   }
 
-  if (!user || (requireAdmin && !isAdmin)) {
+  if (!user || (requireAdmin && !isAdmin) || (requireAdminOrHR && !isAdmin && !isHR)) {
     return null;
   }
 
