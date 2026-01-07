@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
+import { ProductImageGallery } from "@/components/ProductImageGallery";
 import { Package, MessageSquare, ShoppingCart, ArrowLeft, FileText, Download, MessageCircle } from "lucide-react";
 import { z } from "zod";
 
@@ -262,20 +263,11 @@ export default function ProductDetail() {
         </Link>
 
         <div className="grid lg:grid-cols-2 gap-8">
-          {/* Product Image */}
-          <div className="aspect-square bg-muted rounded-lg overflow-hidden">
-            {product.image_url ? (
-              <img
-                src={product.image_url}
-                alt={product.name}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center">
-                <Package className="h-24 w-24 text-muted-foreground" />
-              </div>
-            )}
-          </div>
+          {/* Product Image Gallery */}
+          <ProductImageGallery 
+            images={product.image_url ? [product.image_url] : []} 
+            productName={product.name} 
+          />
 
           {/* Product Info & Order Form */}
           <div>

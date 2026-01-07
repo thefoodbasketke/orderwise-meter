@@ -285,6 +285,12 @@ export default function Index() {
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
                 </Link>
+                <Link to="/register-meter">
+                  <Button size="lg" variant="ghost" className="text-primary-foreground hover:bg-white/10 border border-white/20">
+                    <Shield className="mr-2 h-4 w-4" />
+                    Register Meter
+                  </Button>
+                </Link>
                 {!user && (
                   <Link to="/auth">
                     <Button size="lg" variant="ghost" className="text-primary-foreground hover:bg-white/10">
