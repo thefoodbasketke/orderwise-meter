@@ -8,7 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { Package, Search, Filter, Zap, Droplets, Flame, Grid3X3, MessageCircle } from "lucide-react";
+import { ProductQuickView } from "@/components/ProductQuickView";
+import { Package, Search, Filter, Zap, Droplets, Flame, Grid3X3, MessageCircle, Eye } from "lucide-react";
 
 interface Product {
   id: string;
@@ -18,6 +19,8 @@ interface Product {
   image_url: string;
   stock: number;
   category: string;
+  specifications?: string | null;
+  catalogue_pdf_url?: string | null;
 }
 
 const categories = [
@@ -34,6 +37,7 @@ export default function Products() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
+  const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -158,7 +162,7 @@ export default function Products() {
             {filteredProducts.map((product) => (
               <Card key={product.id} className="group hover:shadow-hover transition-all duration-300">
                 <CardHeader className="p-0">
-                  <div className="aspect-square bg-muted rounded-t-lg overflow-hidden">
+                  <div className="aspect-square bg-muted rounded-t-lg overflow-hidden relative">
                     {product.image_url ? (
                       <img
                         src={product.image_url}
@@ -170,6 +174,16 @@ export default function Products() {
                         <Package className="h-16 w-16 text-muted-foreground" />
                       </div>
                     )}
+                    {/* Quick View Button */}
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                      onClick={() => setQuickViewProduct(product)}
+                    >
+                      <Eye className="h-4 w-4 mr-1" />
+                      Quick View
+                    </Button>
                   </div>
                 </CardHeader>
                 <CardContent className="p-4">
@@ -227,6 +241,13 @@ export default function Products() {
           </div>
         )}
       </div>
+
+      {/* Quick View Modal */}
+      <ProductQuickView
+        product={quickViewProduct}
+        open={!!quickViewProduct}
+        onOpenChange={(open) => !open && setQuickViewProduct(null)}
+      />
 
       <Footer />
     </div>
