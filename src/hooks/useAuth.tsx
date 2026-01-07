@@ -6,9 +6,11 @@ import { useNavigate } from "react-router-dom";
 interface AuthContextType {
   user: User | null;
   session: Session | null;
-  userRole: string | null;
+  userRoles: string[];
   isAdmin: boolean;
   isHR: boolean;
+  isSales: boolean;
+  canSubmitDelivery: boolean;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signUp: (email: string, password: string, fullName: string, phoneNumber: string) => Promise<{ error: any }>;
@@ -20,7 +22,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
-  const [userRole, setUserRole] = useState<string | null>(null);
+  const [userRoles, setUserRoles] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
@@ -32,12 +34,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(session?.user ?? null);
         
         if (session?.user) {
-          // Fetch user role after state update
+          // Fetch user roles after state update
           setTimeout(() => {
             fetchUserRole(session.user.id);
           }, 0);
         } else {
-          setUserRole(null);
+          setUserRoles([]);
         }
       }
     );
@@ -63,14 +65,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const { data, error } = await supabase
         .from("user_roles")
         .select("role")
-        .eq("user_id", userId)
-        .single();
+        .eq("user_id", userId);
 
       if (error) throw error;
-      setUserRole(data.role);
+      const roles = (data || []).map((r: any) => r.role);
+      setUserRoles(roles.length ? roles : ["customer"]);
     } catch (error) {
       console.error("Error fetching user role:", error);
-      setUserRole("customer"); // Default to customer
+      setUserRoles(["customer"]); // Default to customer
     }
   };
 
@@ -101,16 +103,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signOut = async () => {
     await supabase.auth.signOut();
-    setUserRole(null);
+    setUserRoles([]);
     navigate("/auth");
   };
+
+  const isAdmin = userRoles.includes("admin");
+  const isHR = userRoles.includes("hr");
+  const isSales = userRoles.includes("sales");
 
   const value = {
     user,
     session,
-    userRole,
-    isAdmin: userRole === "admin",
-    isHR: userRole === "hr",
+    userRoles,
+    isAdmin,
+    isHR,
+    isSales,
+    canSubmitDelivery: isSales || isHR,
     loading,
     signIn,
     signUp,
