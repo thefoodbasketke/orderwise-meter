@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { 
   ShoppingBag, 
   MessageSquare, 
@@ -39,6 +40,16 @@ interface HeroBanner {
   image_url: string | null;
   video_url: string | null;
   is_active: boolean;
+}
+
+interface Product {
+  id: string;
+  name: string;
+  description: string | null;
+  base_price: number;
+  image_url: string | null;
+  stock: number;
+  category: string | null;
 }
 
 const stats = [
@@ -109,6 +120,7 @@ export default function Index() {
   const { user } = useAuth();
   const [heroBanners, setHeroBanners] = useState<HeroBanner[]>([]);
   const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
+  const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
 
   useEffect(() => {
     const fetchHeroBanners = async () => {
@@ -119,7 +131,18 @@ export default function Index() {
         .order("updated_at", { ascending: false });
       if (data && data.length > 0) setHeroBanners(data);
     };
+    
+    const fetchFeaturedProducts = async () => {
+      const { data } = await supabase
+        .from("products")
+        .select("id, name, description, base_price, image_url, stock, category")
+        .gt("stock", 0)
+        .limit(4);
+      if (data) setFeaturedProducts(data);
+    };
+    
     fetchHeroBanners();
+    fetchFeaturedProducts();
   }, []);
 
   // Auto-rotate banners every 6 seconds
@@ -355,6 +378,70 @@ export default function Index() {
           </div>
         </div>
       </section>
+
+      {/* Featured Products */}
+      {featuredProducts.length > 0 && (
+        <section className="py-20 bg-muted/30">
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl md:text-4xl font-bold mb-4">Featured Products</h2>
+              <p className="text-muted-foreground max-w-2xl mx-auto">
+                Browse our selection of quality prepaid meters available for immediate purchase
+              </p>
+            </div>
+            
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {featuredProducts.map((product) => (
+                <Card key={product.id} className="group overflow-hidden hover:shadow-hover transition-all duration-300">
+                  <div className="aspect-square bg-muted/50 relative overflow-hidden">
+                    {product.image_url ? (
+                      <img
+                        src={product.image_url}
+                        alt={product.name}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <ShoppingBag className="h-16 w-16 text-muted-foreground/30" />
+                      </div>
+                    )}
+                    {product.category && (
+                      <Badge className="absolute top-3 left-3" variant="secondary">
+                        {product.category}
+                      </Badge>
+                    )}
+                  </div>
+                  <CardContent className="p-4">
+                    <h3 className="font-semibold mb-1 line-clamp-1">{product.name}</h3>
+                    <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
+                      {product.description || "Quality prepaid meter"}
+                    </p>
+                    <div className="flex items-center justify-between">
+                      <span className="text-lg font-bold text-primary">
+                        KES {product.base_price.toLocaleString()}
+                      </span>
+                      <Link to={`/products/${product.id}`}>
+                        <Button size="sm" variant="outline">
+                          View
+                        </Button>
+                      </Link>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+            
+            <div className="text-center mt-10">
+              <Link to="/products">
+                <Button size="lg">
+                  View All Products
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Services Preview */}
       <section className="py-16 bg-muted/30">
