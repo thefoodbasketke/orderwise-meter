@@ -36,6 +36,8 @@ import AdminPayments from "./pages/admin/Payments";
 import AdminMeterRegistrations from "./pages/admin/MeterRegistrations";
 import AdminQuoteRequests from "./pages/admin/QuoteRequests";
 import AdminContentManagement from "./pages/admin/ContentManagement";
+import AdminProjects from "./pages/admin/Projects";
+import AdminBlogs from "./pages/admin/Blogs";
 
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { WhatsAppFloat } from "./components/WhatsAppFloat";
@@ -84,6 +86,8 @@ const App = () => (
               <Route path="/admin/meter-registrations" element={<ProtectedRoute requireAdmin><AdminMeterRegistrations /></ProtectedRoute>} />
               <Route path="/admin/quote-requests" element={<ProtectedRoute requireAdmin><AdminQuoteRequests /></ProtectedRoute>} />
               <Route path="/admin/content" element={<ProtectedRoute requireAdmin><AdminContentManagement /></ProtectedRoute>} />
+              <Route path="/admin/projects" element={<ProtectedRoute requireAdmin><AdminProjects /></ProtectedRoute>} />
+              <Route path="/admin/blogs" element={<ProtectedRoute requireAdmin><AdminBlogs /></ProtectedRoute>} />
               
               <Route path="*" element={<NotFound />} />
             </Routes>
