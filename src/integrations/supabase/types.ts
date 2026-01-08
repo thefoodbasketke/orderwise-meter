@@ -14,6 +14,54 @@ export type Database = {
   }
   public: {
     Tables: {
+      blogs: {
+        Row: {
+          author: string | null
+          category: string | null
+          content: string
+          created_at: string
+          excerpt: string | null
+          id: string
+          image_url: string | null
+          is_published: boolean | null
+          published_at: string | null
+          slug: string
+          tags: string[] | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          author?: string | null
+          category?: string | null
+          content: string
+          created_at?: string
+          excerpt?: string | null
+          id?: string
+          image_url?: string | null
+          is_published?: boolean | null
+          published_at?: string | null
+          slug: string
+          tags?: string[] | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          author?: string | null
+          category?: string | null
+          content?: string
+          created_at?: string
+          excerpt?: string | null
+          id?: string
+          image_url?: string | null
+          is_published?: boolean | null
+          published_at?: string | null
+          slug?: string
+          tags?: string[] | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       careers: {
         Row: {
           application_deadline: string | null
@@ -352,6 +400,38 @@ export type Database = {
             columns: ["order_id"]
             isOneToOne: false
             referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      product_images: {
+        Row: {
+          created_at: string
+          id: string
+          image_url: string
+          product_id: string
+          sort_order: number | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          image_url: string
+          product_id: string
+          sort_order?: number | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          image_url?: string
+          product_id?: string
+          sort_order?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_images_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
             referencedColumns: ["id"]
           },
         ]
