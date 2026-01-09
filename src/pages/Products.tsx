@@ -271,7 +271,7 @@ function ProductsContent({
                   )}
                 </CardContent>
                 <CardFooter className="p-4 pt-0 flex flex-col gap-2">
-                  <Link to={`/product/${product.id}`} className="w-full">
+                  <Link to={`/products/${product.id}`} className="w-full">
                     <Button className="w-full" disabled={product.stock === 0}>
                       View Details
                     </Button>

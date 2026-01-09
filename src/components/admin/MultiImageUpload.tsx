@@ -4,10 +4,17 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Upload, X, GripVertical } from "lucide-react";
 
+interface ProductImage {
+  id?: string;
+  image_url: string;
+  sort_order: number;
+  file?: File;
+}
+
 interface MultiImageUploadProps {
   productId?: string;
-  existingImages: { id: string; image_url: string; sort_order: number }[];
-  onImagesChange: (images: { id?: string; image_url: string; sort_order: number; file?: File }[]) => void;
+  existingImages: ProductImage[];
+  onImagesChange: (images: ProductImage[]) => void;
 }
 
 export function MultiImageUpload({ productId, existingImages, onImagesChange }: MultiImageUploadProps) {
