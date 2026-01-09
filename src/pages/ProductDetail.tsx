@@ -26,6 +26,12 @@ interface Product {
   catalogue_pdf_url: string | null;
 }
 
+interface ProductImage {
+  id: string;
+  image_url: string;
+  sort_order: number | null;
+}
+
 const orderSchema = z.object({
   quantity: z.number().min(1, "Quantity must be at least 1"),
   customerName: z.string().min(2, "Please enter your full name"),
@@ -51,6 +57,7 @@ export default function ProductDetail() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [product, setProduct] = useState<Product | null>(null);
+  const [productImages, setProductImages] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [orderLoading, setOrderLoading] = useState(false);
   const [negotiationLoading, setNegotiationLoading] = useState(false);
@@ -65,14 +72,20 @@ export default function ProductDetail() {
 
   const fetchProduct = async () => {
     try {
-      const { data, error } = await supabase
-        .from("products")
-        .select("*")
-        .eq("id", id)
-        .single();
+      const [productResult, imagesResult] = await Promise.all([
+        supabase.from("products").select("*").eq("id", id).single(),
+        supabase.from("product_images").select("*").eq("product_id", id).order("sort_order", { ascending: true })
+      ]);
 
-      if (error) throw error;
-      setProduct(data);
+      if (productResult.error) throw productResult.error;
+      setProduct(productResult.data);
+
+      // Combine main image with additional images
+      const additionalImages = (imagesResult.data as ProductImage[] || []).map(img => img.image_url);
+      const allImages = productResult.data.image_url 
+        ? [productResult.data.image_url, ...additionalImages]
+        : additionalImages;
+      setProductImages(allImages);
     } catch (error: any) {
       toast({
         variant: "destructive",
@@ -265,7 +278,7 @@ export default function ProductDetail() {
         <div className="grid lg:grid-cols-2 gap-8">
           {/* Product Image Gallery */}
           <ProductImageGallery 
-            images={product.image_url ? [product.image_url] : []} 
+            images={productImages} 
             productName={product.name} 
           />
 
