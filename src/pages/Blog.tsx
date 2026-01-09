@@ -1,77 +1,89 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar, Clock, ArrowRight, User } from "lucide-react";
+import { Calendar, Clock, ArrowRight, User, BookOpen } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
-const blogPosts = [
-  {
-    id: 1,
-    title: "The Complete Guide to Prepaid Electricity Meters in Kenya",
-    excerpt: "Learn everything you need to know about prepaid electricity meters, from installation to daily usage and maintenance tips.",
-    category: "Guide",
-    author: "UMS Team",
-    date: "2024-01-15",
-    readTime: "8 min read",
-    image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800"
-  },
-  {
-    id: 2,
-    title: "Smart Water Meters vs Traditional Meters: A Comparison",
-    excerpt: "Discover the key differences between smart water meters and traditional meters, and why upgrading can save you money.",
-    category: "Comparison",
-    author: "Technical Team",
-    date: "2024-01-10",
-    readTime: "6 min read",
-    image: "https://images.unsplash.com/photo-1585771724684-38269d6639fd?w=800"
-  },
-  {
-    id: 3,
-    title: "5 Tips for Landlords: Maximizing Revenue with Prepaid Meters",
-    excerpt: "Practical advice for property owners on how to optimize their prepaid metering systems for better tenant management.",
-    category: "Tips",
-    author: "UMS Team",
-    date: "2024-01-05",
-    readTime: "5 min read",
-    image: "https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800"
-  },
-  {
-    id: 4,
-    title: "How to Troubleshoot Common Meter Issues",
-    excerpt: "A step-by-step guide to diagnosing and fixing the most common prepaid meter problems you might encounter.",
-    category: "Technical",
-    author: "Support Team",
-    date: "2023-12-28",
-    readTime: "7 min read",
-    image: "https://images.unsplash.com/photo-1621905252507-b35492cc74b4?w=800"
-  },
-  {
-    id: 5,
-    title: "UMS Kenya Expands to Western Region",
-    excerpt: "We're excited to announce the opening of our new service center in Kisumu, bringing quality metering solutions closer to you.",
-    category: "News",
-    author: "UMS Team",
-    date: "2023-12-20",
-    readTime: "3 min read",
-    image: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800"
-  },
-  {
-    id: 6,
-    title: "Understanding M-Pesa Integration for Token Purchases",
-    excerpt: "A detailed look at how our M-Pesa integration works and how to ensure smooth token purchases every time.",
-    category: "Guide",
-    author: "Technical Team",
-    date: "2023-12-15",
-    readTime: "6 min read",
-    image: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800"
-  }
-];
-
-const categories = ["All", "Guide", "Comparison", "Tips", "Technical", "News"];
+interface BlogPost {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt: string | null;
+  content: string;
+  category: string | null;
+  author: string | null;
+  image_url: string | null;
+  published_at: string | null;
+  created_at: string;
+}
 
 export default function Blog() {
+  const [posts, setPosts] = useState<BlogPost[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [categories, setCategories] = useState<string[]>(["All"]);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    fetchPosts();
+  }, []);
+
+  const fetchPosts = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("blogs")
+        .select("*")
+        .eq("is_published", true)
+        .order("published_at", { ascending: false });
+
+      if (error) throw error;
+
+      setPosts(data || []);
+      
+      // Extract unique categories
+      const uniqueCategories = ["All", ...new Set(data?.map(p => p.category).filter(Boolean) as string[])];
+      setCategories(uniqueCategories);
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to load blog posts",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const filteredPosts = selectedCategory === "All" 
+    ? posts 
+    : posts.filter(post => post.category === selectedCategory);
+
+  const estimateReadTime = (content: string) => {
+    const wordsPerMinute = 200;
+    const words = content.split(/\s+/).length;
+    const minutes = Math.ceil(words / wordsPerMinute);
+    return `${minutes} min read`;
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <div className="container mx-auto px-4 py-12">
+          <div className="text-center">
+            <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent mx-auto mb-4"></div>
+            <p className="text-muted-foreground">Loading posts...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
@@ -95,8 +107,9 @@ export default function Blog() {
             {categories.map((category) => (
               <Button
                 key={category}
-                variant={category === "All" ? "default" : "outline"}
+                variant={category === selectedCategory ? "default" : "outline"}
                 size="sm"
+                onClick={() => setSelectedCategory(category)}
               >
                 {category}
               </Button>
@@ -108,57 +121,72 @@ export default function Blog() {
       {/* Blog Posts */}
       <section className="py-16">
         <div className="container mx-auto px-4">
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {blogPosts.map((post) => (
-              <Card key={post.id} className="overflow-hidden hover:shadow-hover transition-shadow">
-                <div className="aspect-video bg-muted">
-                  <img
-                    src={post.image}
-                    alt={post.title}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <CardHeader className="pb-2">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Badge variant="secondary">{post.category}</Badge>
+          {filteredPosts.length === 0 ? (
+            <Card className="text-center py-12">
+              <CardContent>
+                <BookOpen className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-lg font-semibold mb-2">No Posts Yet</h3>
+                <p className="text-muted-foreground">Check back soon for new content!</p>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {filteredPosts.map((post) => (
+                <Card key={post.id} className="overflow-hidden hover:shadow-hover transition-shadow">
+                  <div className="aspect-video bg-muted">
+                    {post.image_url ? (
+                      <img
+                        src={post.image_url}
+                        alt={post.title}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <BookOpen className="h-12 w-12 text-muted-foreground" />
+                      </div>
+                    )}
                   </div>
-                  <CardTitle className="text-lg line-clamp-2">{post.title}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground text-sm mb-4 line-clamp-2">
-                    {post.excerpt}
-                  </p>
-                  <div className="flex items-center justify-between text-xs text-muted-foreground">
-                    <div className="flex items-center gap-4">
+                  <CardHeader className="pb-2">
+                    <div className="flex items-center gap-2 mb-2">
+                      {post.category && (
+                        <Badge variant="secondary">{post.category}</Badge>
+                      )}
+                    </div>
+                    <CardTitle className="text-lg line-clamp-2">{post.title}</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-muted-foreground text-sm mb-4 line-clamp-2">
+                      {post.excerpt || post.content.substring(0, 150) + "..."}
+                    </p>
+                    <div className="flex items-center justify-between text-xs text-muted-foreground">
+                      <div className="flex items-center gap-4">
+                        {post.author && (
+                          <span className="flex items-center gap-1">
+                            <User className="h-3 w-3" />
+                            {post.author}
+                          </span>
+                        )}
+                        <span className="flex items-center gap-1">
+                          <Calendar className="h-3 w-3" />
+                          {new Date(post.published_at || post.created_at).toLocaleDateString()}
+                        </span>
+                      </div>
                       <span className="flex items-center gap-1">
-                        <User className="h-3 w-3" />
-                        {post.author}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Calendar className="h-3 w-3" />
-                        {new Date(post.date).toLocaleDateString()}
+                        <Clock className="h-3 w-3" />
+                        {estimateReadTime(post.content)}
                       </span>
                     </div>
-                    <span className="flex items-center gap-1">
-                      <Clock className="h-3 w-3" />
-                      {post.readTime}
-                    </span>
-                  </div>
-                  <Button variant="link" className="px-0 mt-4">
-                    Read More
-                    <ArrowRight className="ml-1 h-4 w-4" />
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-          
-          {/* Load More */}
-          <div className="text-center mt-12">
-            <Button variant="outline" size="lg">
-              Load More Articles
-            </Button>
-          </div>
+                    <Button variant="link" className="px-0 mt-4" asChild>
+                      <Link to={`/blog/${post.slug}`}>
+                        Read More
+                        <ArrowRight className="ml-1 h-4 w-4" />
+                      </Link>
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 

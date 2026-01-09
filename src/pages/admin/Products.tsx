@@ -9,8 +9,9 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Plus, Edit, Trash, Upload, ImageIcon, FileText } from "lucide-react";
+import { Plus, Edit, Trash, FileText, ImageIcon, Images } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { MultiImageUpload } from "@/components/admin/MultiImageUpload";
 import { z } from "zod";
 
 interface Product {
@@ -23,6 +24,13 @@ interface Product {
   category: string;
   specifications: string | null;
   catalogue_pdf_url: string | null;
+}
+
+interface ProductImage {
+  id?: string;
+  image_url: string;
+  sort_order: number;
+  file?: File;
 }
 
 const productSchema = z.object({
@@ -40,11 +48,9 @@ export default function AdminProducts() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [uploading, setUploading] = useState(false);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [productImages, setProductImages] = useState<ProductImage[]>([]);
   const [pdfFile, setPdfFile] = useState<File | null>(null);
   const [pdfName, setPdfName] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const pdfInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
@@ -54,13 +60,12 @@ export default function AdminProducts() {
 
   useEffect(() => {
     if (editingProduct) {
-      setImagePreview(editingProduct.image_url || null);
+      fetchProductImages(editingProduct.id);
       setPdfName(editingProduct.catalogue_pdf_url ? "Current PDF" : null);
     } else {
-      setImagePreview(null);
+      setProductImages([]);
       setPdfName(null);
     }
-    setImageFile(null);
     setPdfFile(null);
   }, [editingProduct, dialogOpen]);
 
@@ -84,30 +89,19 @@ export default function AdminProducts() {
     }
   };
 
-  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const fetchProductImages = async (productId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from("product_images")
+        .select("*")
+        .eq("product_id", productId)
+        .order("sort_order", { ascending: true });
 
-    if (!file.type.startsWith("image/")) {
-      toast({
-        variant: "destructive",
-        title: "Invalid file",
-        description: "Please select an image file",
-      });
-      return;
+      if (error) throw error;
+      setProductImages(data || []);
+    } catch (error) {
+      console.error("Error fetching product images:", error);
     }
-
-    if (file.size > 5 * 1024 * 1024) {
-      toast({
-        variant: "destructive",
-        title: "File too large",
-        description: "Image must be less than 5MB",
-      });
-      return;
-    }
-
-    setImageFile(file);
-    setImagePreview(URL.createObjectURL(file));
   };
 
   const handlePdfSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -156,7 +150,7 @@ export default function AdminProducts() {
     return publicUrl;
   };
 
-  const uploadImage = async (file: File): Promise<string | null> => {
+  const uploadImage = async (file: File): Promise<string> => {
     const fileExt = file.name.split(".").pop();
     const fileName = `${crypto.randomUUID()}.${fileExt}`;
     const filePath = `products/${fileName}`;
@@ -195,13 +189,21 @@ export default function AdminProducts() {
 
       productSchema.parse(data);
 
-      let imageUrl = editingProduct?.image_url || null;
-      let pdfUrl = editingProduct?.catalogue_pdf_url || null;
-      
-      if (imageFile) {
-        imageUrl = await uploadImage(imageFile);
+      // Upload new images and get URLs
+      const uploadedImages: { image_url: string; sort_order: number }[] = [];
+      for (const img of productImages) {
+        if (img.file) {
+          const url = await uploadImage(img.file);
+          uploadedImages.push({ image_url: url, sort_order: img.sort_order });
+        } else if (img.id) {
+          uploadedImages.push({ image_url: img.image_url, sort_order: img.sort_order });
+        }
       }
 
+      // Main image is the first one
+      const mainImageUrl = uploadedImages[0]?.image_url || editingProduct?.image_url || null;
+
+      let pdfUrl = editingProduct?.catalogue_pdf_url || null;
       if (pdfFile) {
         pdfUrl = await uploadPdf(pdfFile);
       }
@@ -210,7 +212,7 @@ export default function AdminProducts() {
         name: data.name,
         description: data.description,
         base_price: data.basePrice,
-        image_url: imageUrl,
+        image_url: mainImageUrl,
         stock: data.stock,
         category: data.category,
         specifications: data.specifications || null,
@@ -224,20 +226,54 @@ export default function AdminProducts() {
           .eq("id", editingProduct.id);
 
         if (error) throw error;
+
+        // Delete old images and insert new ones
+        await supabase
+          .from("product_images")
+          .delete()
+          .eq("product_id", editingProduct.id);
+
+        if (uploadedImages.length > 0) {
+          const { error: imgError } = await supabase
+            .from("product_images")
+            .insert(uploadedImages.map(img => ({
+              product_id: editingProduct.id,
+              image_url: img.image_url,
+              sort_order: img.sort_order,
+            })));
+
+          if (imgError) console.error("Error saving images:", imgError);
+        }
+
         toast({ title: "Success", description: "Product updated successfully" });
       } else {
-        const { error } = await supabase
+        const { data: newProduct, error } = await supabase
           .from("products")
-          .insert(productData);
+          .insert(productData)
+          .select()
+          .single();
 
         if (error) throw error;
+
+        // Insert product images
+        if (uploadedImages.length > 0 && newProduct) {
+          const { error: imgError } = await supabase
+            .from("product_images")
+            .insert(uploadedImages.map(img => ({
+              product_id: newProduct.id,
+              image_url: img.image_url,
+              sort_order: img.sort_order,
+            })));
+
+          if (imgError) console.error("Error saving images:", imgError);
+        }
+
         toast({ title: "Success", description: "Product created successfully" });
       }
 
       setDialogOpen(false);
       setEditingProduct(null);
-      setImageFile(null);
-      setImagePreview(null);
+      setProductImages([]);
       setPdfFile(null);
       setPdfName(null);
       fetchProducts();
@@ -264,6 +300,12 @@ export default function AdminProducts() {
     if (!confirm("Are you sure you want to delete this product?")) return;
 
     try {
+      // Delete images first
+      await supabase
+        .from("product_images")
+        .delete()
+        .eq("product_id", id);
+
       const { error } = await supabase
         .from("products")
         .delete()
@@ -293,8 +335,7 @@ export default function AdminProducts() {
               setDialogOpen(open);
               if (!open) {
                 setEditingProduct(null);
-                setImageFile(null);
-                setImagePreview(null);
+                setProductImages([]);
                 setPdfFile(null);
                 setPdfName(null);
               }
@@ -305,7 +346,7 @@ export default function AdminProducts() {
                   Add Product
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
+              <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                   <DialogTitle>
                     {editingProduct ? "Edit Product" : "Add New Product"}
@@ -330,26 +371,28 @@ export default function AdminProducts() {
                       rows={3}
                     />
                   </div>
-                  <div>
-                    <Label htmlFor="basePrice">Base Price (KSh)</Label>
-                    <Input
-                      id="basePrice"
-                      name="basePrice"
-                      type="number"
-                      step="0.01"
-                      defaultValue={editingProduct?.base_price}
-                      required
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="stock">Stock</Label>
-                    <Input
-                      id="stock"
-                      name="stock"
-                      type="number"
-                      defaultValue={editingProduct?.stock}
-                      required
-                    />
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="basePrice">Base Price (KSh)</Label>
+                      <Input
+                        id="basePrice"
+                        name="basePrice"
+                        type="number"
+                        step="0.01"
+                        defaultValue={editingProduct?.base_price}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="stock">Stock</Label>
+                      <Input
+                        id="stock"
+                        name="stock"
+                        type="number"
+                        defaultValue={editingProduct?.stock}
+                        required
+                      />
+                    </div>
                   </div>
                   <div>
                     <Label htmlFor="category">Category</Label>
@@ -369,39 +412,14 @@ export default function AdminProducts() {
                       placeholder="Enter product specifications..."
                     />
                   </div>
-                  <div>
-                    <Label>Product Image</Label>
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      accept="image/*"
-                      onChange={handleImageSelect}
-                      className="hidden"
-                    />
-                    <div 
-                      onClick={() => fileInputRef.current?.click()}
-                      className="mt-2 border-2 border-dashed border-border rounded-lg p-4 cursor-pointer hover:border-primary transition-colors"
-                    >
-                      {imagePreview ? (
-                        <div className="relative">
-                          <img 
-                            src={imagePreview} 
-                            alt="Preview" 
-                            className="w-full h-40 object-cover rounded-md"
-                          />
-                          <p className="text-xs text-muted-foreground mt-2 text-center">
-                            Click to change image
-                          </p>
-                        </div>
-                      ) : (
-                        <div className="flex flex-col items-center justify-center py-4 text-muted-foreground">
-                          <Upload className="h-8 w-8 mb-2" />
-                          <p className="text-sm">Click to upload image</p>
-                          <p className="text-xs">PNG, JPG up to 5MB</p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
+                  
+                  {/* Multiple Image Upload */}
+                  <MultiImageUpload
+                    productId={editingProduct?.id}
+                    existingImages={productImages}
+                    onImagesChange={setProductImages}
+                  />
+
                   <div>
                     <Label>Product Catalogue (PDF)</Label>
                     <input
@@ -448,12 +466,18 @@ export default function AdminProducts() {
               {products.map((product) => (
                 <Card key={product.id} className="overflow-hidden">
                   {product.image_url ? (
-                    <div className="h-48 overflow-hidden bg-muted">
+                    <div className="h-48 overflow-hidden bg-muted relative">
                       <img 
                         src={product.image_url} 
                         alt={product.name}
                         className="w-full h-full object-cover"
                       />
+                      <div className="absolute top-2 right-2">
+                        <Badge variant="secondary" className="text-xs">
+                          <Images className="h-3 w-3 mr-1" />
+                          Gallery
+                        </Badge>
+                      </div>
                     </div>
                   ) : (
                     <div className="h-48 bg-muted flex items-center justify-center">
