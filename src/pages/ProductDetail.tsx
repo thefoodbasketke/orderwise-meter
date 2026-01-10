@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { ProductImageGallery } from "@/components/ProductImageGallery";
-import { Package, MessageSquare, ShoppingCart, ArrowLeft, FileText, Download, MessageCircle } from "lucide-react";
+import { Package, MessageSquare, ShoppingCart, ArrowLeft, FileText, Download, MessageCircle, Tag } from "lucide-react";
 import { z } from "zod";
 
 interface Product {
@@ -24,6 +24,7 @@ interface Product {
   category: string;
   specifications: string | null;
   catalogue_pdf_url: string | null;
+  label: string | null;
 }
 
 interface ProductImage {
@@ -285,10 +286,16 @@ export default function ProductDetail() {
           {/* Product Info & Order Form */}
           <div>
             <h1 className="text-3xl font-bold mb-4">{product.name}</h1>
-            <div className="flex items-center gap-3 mb-4">
+            <div className="flex items-center gap-3 mb-4 flex-wrap">
               <span className="text-3xl font-bold text-primary">
                 KSh {product.base_price.toLocaleString()}
               </span>
+              {product.label && (
+                <Badge className="bg-accent text-accent-foreground">
+                  <Tag className="h-3 w-3 mr-1" />
+                  {product.label}
+                </Badge>
+              )}
               <Badge variant={product.stock > 0 ? "default" : "destructive"}>
                 {product.stock > 0 ? `${product.stock} in stock` : "Out of stock"}
               </Badge>

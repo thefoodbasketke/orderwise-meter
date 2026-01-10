@@ -9,7 +9,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Plus, Edit, Trash, FileText, ImageIcon, Images } from "lucide-react";
+import { Plus, Edit, Trash, FileText, ImageIcon, Images, Tag } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { MultiImageUpload } from "@/components/admin/MultiImageUpload";
 import { z } from "zod";
@@ -24,6 +25,7 @@ interface Product {
   category: string;
   specifications: string | null;
   catalogue_pdf_url: string | null;
+  label: string | null;
 }
 
 interface ProductImage {
@@ -40,7 +42,17 @@ const productSchema = z.object({
   stock: z.number().min(0, "Stock cannot be negative"),
   category: z.string().max(50),
   specifications: z.string().max(2000).optional(),
+  label: z.string().optional(),
 });
+
+const PRODUCT_LABELS = [
+  { value: "", label: "No Label" },
+  { value: "On Offer", label: "On Offer" },
+  { value: "New", label: "New" },
+  { value: "Best Seller", label: "Best Seller" },
+  { value: "Limited Stock", label: "Limited Stock" },
+  { value: "Clearance", label: "Clearance" },
+];
 
 export default function AdminProducts() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -51,6 +63,7 @@ export default function AdminProducts() {
   const [productImages, setProductImages] = useState<ProductImage[]>([]);
   const [pdfFile, setPdfFile] = useState<File | null>(null);
   const [pdfName, setPdfName] = useState<string | null>(null);
+  const [selectedLabel, setSelectedLabel] = useState<string>("");
   const pdfInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
@@ -62,9 +75,11 @@ export default function AdminProducts() {
     if (editingProduct) {
       fetchProductImages(editingProduct.id);
       setPdfName(editingProduct.catalogue_pdf_url ? "Current PDF" : null);
+      setSelectedLabel(editingProduct.label || "");
     } else {
       setProductImages([]);
       setPdfName(null);
+      setSelectedLabel("");
     }
     setPdfFile(null);
   }, [editingProduct, dialogOpen]);
@@ -185,6 +200,7 @@ export default function AdminProducts() {
         stock: parseInt(formData.get("stock") as string),
         category: formData.get("category") as string,
         specifications: formData.get("specifications") as string || "",
+        label: selectedLabel || undefined,
       };
 
       productSchema.parse(data);
@@ -217,6 +233,7 @@ export default function AdminProducts() {
         category: data.category,
         specifications: data.specifications || null,
         catalogue_pdf_url: pdfUrl,
+        label: selectedLabel || null,
       };
 
       if (editingProduct) {
@@ -276,6 +293,7 @@ export default function AdminProducts() {
       setProductImages([]);
       setPdfFile(null);
       setPdfName(null);
+      setSelectedLabel("");
       fetchProducts();
     } catch (error: any) {
       if (error instanceof z.ZodError) {
@@ -394,13 +412,33 @@ export default function AdminProducts() {
                       />
                     </div>
                   </div>
-                  <div>
-                    <Label htmlFor="category">Category</Label>
-                    <Input
-                      id="category"
-                      name="category"
-                      defaultValue={editingProduct?.category}
-                    />
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="category">Category</Label>
+                      <Input
+                        id="category"
+                        name="category"
+                        defaultValue={editingProduct?.category}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="label">Product Label</Label>
+                      <Select value={selectedLabel} onValueChange={setSelectedLabel}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select label" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {PRODUCT_LABELS.map((label) => (
+                            <SelectItem key={label.value} value={label.value || "none"}>
+                              <span className="flex items-center gap-2">
+                                {label.value && <Tag className="h-3 w-3" />}
+                                {label.label}
+                              </span>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
                   <div>
                     <Label htmlFor="specifications">Specifications</Label>
@@ -472,7 +510,13 @@ export default function AdminProducts() {
                         alt={product.name}
                         className="w-full h-full object-cover"
                       />
-                      <div className="absolute top-2 right-2">
+                      <div className="absolute top-2 right-2 flex gap-1">
+                        {product.label && (
+                          <Badge className="text-xs bg-accent text-accent-foreground">
+                            <Tag className="h-3 w-3 mr-1" />
+                            {product.label}
+                          </Badge>
+                        )}
                         <Badge variant="secondary" className="text-xs">
                           <Images className="h-3 w-3 mr-1" />
                           Gallery
@@ -480,8 +524,16 @@ export default function AdminProducts() {
                       </div>
                     </div>
                   ) : (
-                    <div className="h-48 bg-muted flex items-center justify-center">
+                    <div className="h-48 bg-muted flex items-center justify-center relative">
                       <ImageIcon className="h-12 w-12 text-muted-foreground" />
+                      {product.label && (
+                        <div className="absolute top-2 right-2">
+                          <Badge className="text-xs bg-accent text-accent-foreground">
+                            <Tag className="h-3 w-3 mr-1" />
+                            {product.label}
+                          </Badge>
+                        </div>
+                      )}
                     </div>
                   )}
                   <CardHeader className="pb-2">

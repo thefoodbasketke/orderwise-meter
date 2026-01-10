@@ -7,7 +7,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Package, MessageCircle, ArrowRight, FileText } from "lucide-react";
+import { Package, MessageCircle, ArrowRight, FileText, Tag } from "lucide-react";
 
 interface Product {
   id: string;
@@ -19,6 +19,7 @@ interface Product {
   category: string | null;
   specifications?: string | null;
   catalogue_pdf_url?: string | null;
+  label?: string | null;
 }
 
 interface ProductQuickViewProps {
@@ -55,7 +56,13 @@ export function ProductQuickView({ product, open, onOpenChange }: ProductQuickVi
           
           {/* Product Details */}
           <div className="flex flex-col">
-            <div className="flex items-center gap-2 mb-3">
+            <div className="flex items-center gap-2 mb-3 flex-wrap">
+              {product.label && (
+                <Badge className="bg-accent text-accent-foreground">
+                  <Tag className="h-3 w-3 mr-1" />
+                  {product.label}
+                </Badge>
+              )}
               {product.category && (
                 <Badge variant="secondary">{product.category}</Badge>
               )}
@@ -108,7 +115,7 @@ export function ProductQuickView({ product, open, onOpenChange }: ProductQuickVi
                 </a>
               </div>
               
-              <Link to={`/product/${product.id}`} className="block" onClick={() => onOpenChange(false)}>
+              <Link to={`/products/${product.id}`} className="block" onClick={() => onOpenChange(false)}>
                 <Button variant="outline" className="w-full">
                   View Full Details
                   <ArrowRight className="h-4 w-4 ml-2" />
