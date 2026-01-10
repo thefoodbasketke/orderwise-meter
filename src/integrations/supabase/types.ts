@@ -445,6 +445,7 @@ export type Database = {
           description: string | null
           id: string
           image_url: string | null
+          label: string | null
           name: string
           specifications: string | null
           stock: number
@@ -458,6 +459,7 @@ export type Database = {
           description?: string | null
           id?: string
           image_url?: string | null
+          label?: string | null
           name: string
           specifications?: string | null
           stock?: number
@@ -471,6 +473,7 @@ export type Database = {
           description?: string | null
           id?: string
           image_url?: string | null
+          label?: string | null
           name?: string
           specifications?: string | null
           stock?: number

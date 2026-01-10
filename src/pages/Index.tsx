@@ -28,7 +28,8 @@ import {
   Coins,
   Home,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Tag
 } from "lucide-react";
 import umsLogo from "@/assets/ums-logo.png";
 
@@ -50,6 +51,7 @@ interface Product {
   image_url: string | null;
   stock: number;
   category: string | null;
+  label: string | null;
 }
 
 const stats = [
@@ -135,7 +137,7 @@ export default function Index() {
     const fetchFeaturedProducts = async () => {
       const { data } = await supabase
         .from("products")
-        .select("id, name, description, base_price, image_url, stock, category")
+        .select("id, name, description, base_price, image_url, stock, category, label")
         .gt("stock", 0)
         .limit(4);
       if (data) setFeaturedProducts(data);
@@ -411,11 +413,19 @@ export default function Index() {
                         <ShoppingBag className="h-16 w-16 text-muted-foreground/30" />
                       </div>
                     )}
-                    {product.category && (
-                      <Badge className="absolute top-3 left-3" variant="secondary">
-                        {product.category}
-                      </Badge>
-                    )}
+                    <div className="absolute top-3 left-3 flex flex-col gap-1">
+                      {product.label && (
+                        <Badge className="bg-accent text-accent-foreground">
+                          <Tag className="h-3 w-3 mr-1" />
+                          {product.label}
+                        </Badge>
+                      )}
+                      {product.category && (
+                        <Badge variant="secondary">
+                          {product.category}
+                        </Badge>
+                      )}
+                    </div>
                   </div>
                   <CardContent className="p-4">
                     <h3 className="font-semibold mb-1 line-clamp-1">{product.name}</h3>

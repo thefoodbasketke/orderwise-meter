@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { ProductQuickView } from "@/components/ProductQuickView";
 import { CompareProvider, CompareButton, CompareDrawer } from "@/components/CompareProducts";
-import { Package, Search, Filter, Zap, Droplets, Flame, Grid3X3, MessageCircle, Eye, Scale } from "lucide-react";
+import { Package, Search, Filter, Zap, Droplets, Flame, Grid3X3, MessageCircle, Eye, Scale, Tag } from "lucide-react";
 
 interface Product {
   id: string;
@@ -22,6 +22,7 @@ interface Product {
   category: string;
   specifications?: string | null;
   catalogue_pdf_url?: string | null;
+  label?: string | null;
 }
 
 const categories = [
@@ -235,6 +236,15 @@ function ProductsContent({
                         <Package className="h-16 w-16 text-muted-foreground" />
                       </div>
                     )}
+                    {/* Product Label */}
+                    {product.label && (
+                      <div className="absolute top-2 left-2">
+                        <Badge className="bg-accent text-accent-foreground shadow-md">
+                          <Tag className="h-3 w-3 mr-1" />
+                          {product.label}
+                        </Badge>
+                      </div>
+                    )}
                     {/* Quick View & Compare Buttons */}
                     <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                       <Button
@@ -246,7 +256,7 @@ function ProductsContent({
                         Quick View
                       </Button>
                     </div>
-                    <div className="absolute top-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="absolute bottom-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity">
                       <CompareButton product={product} />
                     </div>
                   </div>
