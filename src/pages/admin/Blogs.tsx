@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Plus, Edit, Trash, Upload, ImageIcon, Eye, EyeOff } from "lucide-react";
+import { Plus, Edit, Trash, Upload, ImageIcon, Eye, EyeOff, Star } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 interface Blog {
@@ -24,6 +24,7 @@ interface Blog {
   category: string | null;
   tags: string[] | null;
   is_published: boolean;
+  is_featured: boolean;
   published_at: string | null;
   created_at: string;
 }
@@ -141,6 +142,7 @@ export default function AdminBlogs() {
 
       const title = formData.get("title") as string;
       const isPublished = formData.get("is_published") === "on";
+      const isFeatured = formData.get("is_featured") === "on";
       const tagsString = formData.get("tags") as string;
       const tags = tagsString ? tagsString.split(",").map(t => t.trim()).filter(Boolean) : null;
 
@@ -154,6 +156,7 @@ export default function AdminBlogs() {
         category: formData.get("category") as string || null,
         tags,
         is_published: isPublished,
+        is_featured: isFeatured,
         published_at: isPublished && !editingBlog?.published_at ? new Date().toISOString() : editingBlog?.published_at || null,
       };
 
@@ -325,6 +328,14 @@ export default function AdminBlogs() {
                     />
                   </div>
                   <div className="flex items-center justify-between">
+                    <Label htmlFor="is_featured">Mark as Featured</Label>
+                    <Switch
+                      id="is_featured"
+                      name="is_featured"
+                      defaultChecked={editingBlog?.is_featured}
+                    />
+                  </div>
+                  <div className="flex items-center justify-between">
                     <Label htmlFor="is_published">Publish immediately</Label>
                     <Switch
                       id="is_published"
@@ -398,9 +409,17 @@ export default function AdminBlogs() {
                   <CardHeader className="pb-2">
                     <CardTitle className="text-lg flex items-start justify-between gap-2">
                       <span className="line-clamp-2">{blog.title}</span>
-                      <Badge variant={blog.is_published ? "default" : "secondary"}>
-                        {blog.is_published ? "Published" : "Draft"}
-                      </Badge>
+                      <div className="flex flex-col gap-1 shrink-0">
+                        {blog.is_featured && (
+                          <Badge variant="outline" className="border-yellow-500 text-yellow-600">
+                            <Star className="h-3 w-3 mr-1 fill-yellow-500" />
+                            Featured
+                          </Badge>
+                        )}
+                        <Badge variant={blog.is_published ? "default" : "secondary"}>
+                          {blog.is_published ? "Published" : "Draft"}
+                        </Badge>
+                      </div>
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-3">

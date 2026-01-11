@@ -23,6 +23,7 @@ export type Database = {
           excerpt: string | null
           id: string
           image_url: string | null
+          is_featured: boolean | null
           is_published: boolean | null
           published_at: string | null
           slug: string
@@ -38,6 +39,7 @@ export type Database = {
           excerpt?: string | null
           id?: string
           image_url?: string | null
+          is_featured?: boolean | null
           is_published?: boolean | null
           published_at?: string | null
           slug: string
@@ -53,6 +55,7 @@ export type Database = {
           excerpt?: string | null
           id?: string
           image_url?: string | null
+          is_featured?: boolean | null
           is_published?: boolean | null
           published_at?: string | null
           slug?: string
@@ -168,6 +171,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      gallery_images: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          image_url: string
+          is_active: boolean | null
+          sort_order: number | null
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url: string
+          is_active?: boolean | null
+          sort_order?: number | null
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string
+          is_active?: boolean | null
+          sort_order?: number | null
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: []
       }
       hero_banners: {
         Row: {
@@ -748,6 +784,42 @@ export type Database = {
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
+        }
+        Relationships: []
+      }
+      video_showcases: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean | null
+          sort_order: number | null
+          thumbnail_url: string | null
+          title: string | null
+          updated_at: string
+          video_url: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          sort_order?: number | null
+          thumbnail_url?: string | null
+          title?: string | null
+          updated_at?: string
+          video_url: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          sort_order?: number | null
+          thumbnail_url?: string | null
+          title?: string | null
+          updated_at?: string
+          video_url?: string
         }
         Relationships: []
       }

@@ -29,7 +29,10 @@ import {
   Home,
   ChevronLeft,
   ChevronRight,
-  Tag
+  Tag,
+  BookOpen,
+  Play,
+  Image
 } from "lucide-react";
 import umsLogo from "@/assets/ums-logo.png";
 
@@ -52,6 +55,32 @@ interface Product {
   stock: number;
   category: string | null;
   label: string | null;
+}
+
+interface FeaturedBlog {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt: string | null;
+  image_url: string | null;
+  author: string | null;
+  category: string | null;
+  published_at: string | null;
+}
+
+interface GalleryImage {
+  id: string;
+  title: string | null;
+  description: string | null;
+  image_url: string;
+}
+
+interface VideoShowcase {
+  id: string;
+  title: string | null;
+  description: string | null;
+  video_url: string;
+  thumbnail_url: string | null;
 }
 
 const stats = [
@@ -123,6 +152,9 @@ export default function Index() {
   const [heroBanners, setHeroBanners] = useState<HeroBanner[]>([]);
   const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
   const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
+  const [featuredBlogs, setFeaturedBlogs] = useState<FeaturedBlog[]>([]);
+  const [galleryImages, setGalleryImages] = useState<GalleryImage[]>([]);
+  const [videoShowcases, setVideoShowcases] = useState<VideoShowcase[]>([]);
 
   useEffect(() => {
     const fetchHeroBanners = async () => {
@@ -142,9 +174,43 @@ export default function Index() {
         .limit(4);
       if (data) setFeaturedProducts(data);
     };
+
+    const fetchFeaturedBlogs = async () => {
+      const { data } = await supabase
+        .from("blogs")
+        .select("id, title, slug, excerpt, image_url, author, category, published_at")
+        .eq("is_published", true)
+        .eq("is_featured", true)
+        .order("published_at", { ascending: false })
+        .limit(3);
+      if (data) setFeaturedBlogs(data);
+    };
+
+    const fetchGalleryImages = async () => {
+      const { data } = await supabase
+        .from("gallery_images")
+        .select("id, title, description, image_url")
+        .eq("is_active", true)
+        .order("sort_order", { ascending: true })
+        .limit(6);
+      if (data) setGalleryImages(data);
+    };
+
+    const fetchVideoShowcases = async () => {
+      const { data } = await supabase
+        .from("video_showcases")
+        .select("id, title, description, video_url, thumbnail_url")
+        .eq("is_active", true)
+        .order("sort_order", { ascending: true })
+        .limit(2);
+      if (data) setVideoShowcases(data);
+    };
     
     fetchHeroBanners();
     fetchFeaturedProducts();
+    fetchFeaturedBlogs();
+    fetchGalleryImages();
+    fetchVideoShowcases();
   }, []);
 
   // Auto-rotate banners every 6 seconds
@@ -459,7 +525,166 @@ export default function Index() {
         </section>
       )}
 
-      {/* Services Preview */}
+      {/* Featured Blogs Section */}
+      {featuredBlogs.length > 0 && (
+        <section className="py-20 bg-muted/30">
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-12">
+              <div className="inline-flex items-center gap-2 bg-primary/10 rounded-full px-4 py-2 mb-4">
+                <BookOpen className="h-4 w-4 text-primary" />
+                <span className="text-sm font-medium text-primary">From Our Blog</span>
+              </div>
+              <h2 className="text-3xl md:text-4xl font-bold mb-4">Latest Insights</h2>
+              <p className="text-muted-foreground max-w-2xl mx-auto">
+                Stay updated with the latest news, tips, and guides about utility metering
+              </p>
+            </div>
+            
+            <div className="grid md:grid-cols-3 gap-8">
+              {featuredBlogs.map((blog) => (
+                <Card key={blog.id} className="group overflow-hidden hover:shadow-hover transition-all duration-300">
+                  <div className="aspect-video bg-muted/50 relative overflow-hidden">
+                    {blog.image_url ? (
+                      <img
+                        src={blog.image_url}
+                        alt={blog.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <BookOpen className="h-12 w-12 text-muted-foreground/30" />
+                      </div>
+                    )}
+                    {blog.category && (
+                      <Badge className="absolute top-3 left-3" variant="secondary">
+                        {blog.category}
+                      </Badge>
+                    )}
+                  </div>
+                  <CardContent className="p-5">
+                    <h3 className="font-semibold text-lg mb-2 line-clamp-2 group-hover:text-primary transition-colors">
+                      {blog.title}
+                    </h3>
+                    <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
+                      {blog.excerpt || "Read more about this topic..."}
+                    </p>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-muted-foreground">
+                        {blog.author && `By ${blog.author}`}
+                      </span>
+                      <Link to={`/blog/${blog.slug}`}>
+                        <Button size="sm" variant="ghost" className="text-primary">
+                          Read More
+                          <ArrowRight className="ml-1 h-3 w-3" />
+                        </Button>
+                      </Link>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+            
+            <div className="text-center mt-10">
+              <Link to="/blog">
+                <Button size="lg" variant="outline">
+                  View All Articles
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Gallery Section */}
+      {galleryImages.length > 0 && (
+        <section className="py-20">
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-12">
+              <div className="inline-flex items-center gap-2 bg-accent/10 rounded-full px-4 py-2 mb-4">
+                <Image className="h-4 w-4 text-accent" />
+                <span className="text-sm font-medium text-accent">Our Gallery</span>
+              </div>
+              <h2 className="text-3xl md:text-4xl font-bold mb-4">See Our Work</h2>
+              <p className="text-muted-foreground max-w-2xl mx-auto">
+                A glimpse of our installations and projects across Kenya
+              </p>
+            </div>
+            
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              {galleryImages.map((image, index) => (
+                <div 
+                  key={image.id} 
+                  className={`relative overflow-hidden rounded-lg group ${
+                    index === 0 ? 'md:col-span-2 md:row-span-2' : ''
+                  }`}
+                >
+                  <div className={`${index === 0 ? 'aspect-square md:aspect-auto md:h-full' : 'aspect-square'}`}>
+                    <img
+                      src={image.image_url}
+                      alt={image.title || "Gallery image"}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                  </div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <div className="absolute bottom-4 left-4 right-4 text-white">
+                      {image.title && <h3 className="font-semibold">{image.title}</h3>}
+                      {image.description && <p className="text-sm text-white/80 line-clamp-2">{image.description}</p>}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Video Showcase Section */}
+      {videoShowcases.length > 0 && (
+        <section className="py-20 bg-muted/30">
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-12">
+              <div className="inline-flex items-center gap-2 bg-primary/10 rounded-full px-4 py-2 mb-4">
+                <Play className="h-4 w-4 text-primary" />
+                <span className="text-sm font-medium text-primary">Video Showcase</span>
+              </div>
+              <h2 className="text-3xl md:text-4xl font-bold mb-4">Watch & Learn</h2>
+              <p className="text-muted-foreground max-w-2xl mx-auto">
+                Explore our featured videos about products, installations, and more
+              </p>
+            </div>
+            
+            <div className={`grid ${videoShowcases.length === 1 ? 'max-w-3xl mx-auto' : 'md:grid-cols-2'} gap-8`}>
+              {videoShowcases.map((video) => (
+                <Card key={video.id} className="overflow-hidden group">
+                  <div className="aspect-video relative">
+                    <video
+                      src={video.video_url}
+                      poster={video.thumbnail_url || undefined}
+                      controls
+                      className="w-full h-full object-cover"
+                      preload="metadata"
+                    >
+                      Your browser does not support the video tag.
+                    </video>
+                  </div>
+                  {(video.title || video.description) && (
+                    <CardContent className="p-5">
+                      {video.title && (
+                        <h3 className="font-semibold text-lg mb-2">{video.title}</h3>
+                      )}
+                      {video.description && (
+                        <p className="text-sm text-muted-foreground">{video.description}</p>
+                      )}
+                    </CardContent>
+                  )}
+                </Card>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
       <section className="py-16 bg-muted/30">
         <div className="container mx-auto px-4">
           <div className="text-center mb-10">
