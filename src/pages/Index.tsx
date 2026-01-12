@@ -32,8 +32,11 @@ import {
   Tag,
   BookOpen,
   Play,
-  Image
+  Image,
+  X,
+  ZoomIn
 } from "lucide-react";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import umsLogo from "@/assets/ums-logo.png";
 
 interface HeroBanner {
@@ -155,6 +158,7 @@ export default function Index() {
   const [featuredBlogs, setFeaturedBlogs] = useState<FeaturedBlog[]>([]);
   const [galleryImages, setGalleryImages] = useState<GalleryImage[]>([]);
   const [videoShowcases, setVideoShowcases] = useState<VideoShowcase[]>([]);
+  const [lightboxImage, setLightboxImage] = useState<GalleryImage | null>(null);
 
   useEffect(() => {
     const fetchHeroBanners = async () => {
@@ -619,26 +623,56 @@ export default function Index() {
             
             <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
               {galleryImages.map((image) => (
-                <div 
-                  key={image.id} 
-                  className="relative overflow-hidden rounded-md group aspect-square"
+                <button 
+                  key={image.id}
+                  onClick={() => setLightboxImage(image)}
+                  className="relative overflow-hidden rounded-md group aspect-square cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary"
                 >
                   <img
                     src={image.image_url}
                     alt={image.title || "Gallery image"}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                   />
-                  <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center">
+                  <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex flex-col items-center justify-center gap-1">
+                    <ZoomIn className="h-5 w-5 text-white" />
                     {image.title && (
                       <span className="text-white text-xs font-medium text-center px-2 line-clamp-2">{image.title}</span>
                     )}
                   </div>
-                </div>
+                </button>
               ))}
             </div>
           </div>
         </section>
       )}
+
+      {/* Gallery Lightbox Modal */}
+      <Dialog open={!!lightboxImage} onOpenChange={() => setLightboxImage(null)}>
+        <DialogContent className="max-w-4xl w-full p-0 bg-black/95 border-none">
+          <button
+            onClick={() => setLightboxImage(null)}
+            className="absolute right-4 top-4 z-50 rounded-full bg-white/10 p-2 hover:bg-white/20 transition-colors"
+            aria-label="Close lightbox"
+          >
+            <X className="h-5 w-5 text-white" />
+          </button>
+          {lightboxImage && (
+            <div className="relative flex flex-col items-center justify-center p-4">
+              <img
+                src={lightboxImage.image_url}
+                alt={lightboxImage.title || "Gallery image"}
+                className="max-h-[80vh] w-auto object-contain rounded-lg animate-scale-in"
+              />
+              {(lightboxImage.title || lightboxImage.description) && (
+                <div className="mt-4 text-center text-white">
+                  {lightboxImage.title && <h3 className="text-lg font-semibold">{lightboxImage.title}</h3>}
+                  {lightboxImage.description && <p className="text-sm text-white/70 mt-1">{lightboxImage.description}</p>}
+                </div>
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* Video Showcase Section */}
       {videoShowcases.length > 0 && (
