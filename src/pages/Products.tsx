@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { ProductQuickView } from "@/components/ProductQuickView";
 import { CompareProvider, CompareButton, CompareDrawer } from "@/components/CompareProducts";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { Package, Search, Filter, Zap, Droplets, Flame, Grid3X3, MessageCircle, Eye, Scale, Tag } from "lucide-react";
 
 interface Product {
@@ -41,6 +42,7 @@ export default function Products() {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
   const { toast } = useToast();
+  const { settings: siteSettings } = useSiteSettings();
 
   useEffect(() => {
     fetchProducts();
@@ -114,6 +116,7 @@ export default function Products() {
         setSelectedCategory={setSelectedCategory}
         quickViewProduct={quickViewProduct}
         setQuickViewProduct={setQuickViewProduct}
+        siteSettings={siteSettings}
       />
     </CompareProvider>
   );
@@ -129,6 +132,7 @@ interface ProductsContentProps {
   setSelectedCategory: (category: string) => void;
   quickViewProduct: Product | null;
   setQuickViewProduct: (product: Product | null) => void;
+  siteSettings: { hide_pricing: boolean; hide_stock: boolean };
 }
 
 function ProductsContent({
@@ -141,6 +145,7 @@ function ProductsContent({
   setSelectedCategory,
   quickViewProduct,
   setQuickViewProduct,
+  siteSettings,
 }: ProductsContentProps) {
   if (loading) {
     return (
@@ -267,12 +272,16 @@ function ProductsContent({
                     {product.description}
                   </p>
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-xl font-bold text-primary">
-                      KSh {product.base_price.toLocaleString()}
-                    </span>
-                    <Badge variant={product.stock > 0 ? "default" : "destructive"}>
-                      {product.stock > 0 ? `${product.stock} in stock` : "Out of stock"}
-                    </Badge>
+                    {!siteSettings.hide_pricing && (
+                      <span className="text-xl font-bold text-primary">
+                        KSh {product.base_price.toLocaleString()}
+                      </span>
+                    )}
+                    {!siteSettings.hide_stock && (
+                      <Badge variant={product.stock > 0 ? "default" : "destructive"}>
+                        {product.stock > 0 ? `${product.stock} in stock` : "Out of stock"}
+                      </Badge>
+                    )}
                   </div>
                   {product.category && (
                     <Badge variant="secondary" className="text-xs">
@@ -282,13 +291,13 @@ function ProductsContent({
                 </CardContent>
                 <CardFooter className="p-4 pt-0 flex flex-col gap-2">
                   <Link to={`/products/${product.id}`} className="w-full">
-                    <Button className="w-full" disabled={product.stock === 0}>
+                    <Button className="w-full" disabled={!siteSettings.hide_stock && product.stock === 0}>
                       View Details
                     </Button>
                   </Link>
                   <div className="flex gap-2 w-full">
                     <a
-                      href={`https://wa.me/254700444448?text=${encodeURIComponent(`Hi, I'd like to order: ${product.name} (KSh ${product.base_price.toLocaleString()})`)}`}
+                      href={`https://wa.me/254700444448?text=${encodeURIComponent(`Hi, I'd like to order: ${product.name}${!siteSettings.hide_pricing ? ` (KSh ${product.base_price.toLocaleString()})` : ''}`)}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex-1"
@@ -322,6 +331,8 @@ function ProductsContent({
         product={quickViewProduct}
         open={!!quickViewProduct}
         onOpenChange={(open) => !open && setQuickViewProduct(null)}
+        hidePricing={siteSettings.hide_pricing}
+        hideStock={siteSettings.hide_stock}
       />
 
       {/* Compare Drawer */}

@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { useEffect, useState, useCallback } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Navbar } from "@/components/Navbar";
@@ -152,6 +153,7 @@ const features = [
 
 export default function Index() {
   const { user } = useAuth();
+  const { settings: siteSettings } = useSiteSettings();
   const [heroBanners, setHeroBanners] = useState<HeroBanner[]>([]);
   const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
   const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
@@ -503,9 +505,11 @@ export default function Index() {
                       {product.description || "Quality prepaid meter"}
                     </p>
                     <div className="flex items-center justify-between">
-                      <span className="text-lg font-bold text-primary">
-                        KES {product.base_price.toLocaleString()}
-                      </span>
+                      {!siteSettings.hide_pricing && (
+                        <span className="text-lg font-bold text-primary">
+                          KES {product.base_price.toLocaleString()}
+                        </span>
+                      )}
                       <Link to={`/products/${product.id}`}>
                         <Button size="sm" variant="outline">
                           View
