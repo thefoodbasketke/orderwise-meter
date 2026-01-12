@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -55,6 +56,7 @@ const negotiationSchema = z.object({
 export default function ProductDetail() {
   const { id } = useParams();
   const { user } = useAuth();
+  const { settings: siteSettings } = useSiteSettings();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [product, setProduct] = useState<Product | null>(null);
@@ -287,18 +289,22 @@ export default function ProductDetail() {
           <div>
             <h1 className="text-3xl font-bold mb-4">{product.name}</h1>
             <div className="flex items-center gap-3 mb-4 flex-wrap">
-              <span className="text-3xl font-bold text-primary">
-                KSh {product.base_price.toLocaleString()}
-              </span>
+              {!siteSettings.hide_pricing && (
+                <span className="text-3xl font-bold text-primary">
+                  KSh {product.base_price.toLocaleString()}
+                </span>
+              )}
               {product.label && (
                 <Badge className="bg-accent text-accent-foreground">
                   <Tag className="h-3 w-3 mr-1" />
                   {product.label}
                 </Badge>
               )}
-              <Badge variant={product.stock > 0 ? "default" : "destructive"}>
-                {product.stock > 0 ? `${product.stock} in stock` : "Out of stock"}
-              </Badge>
+              {!siteSettings.hide_stock && (
+                <Badge variant={product.stock > 0 ? "default" : "destructive"}>
+                  {product.stock > 0 ? `${product.stock} in stock` : "Out of stock"}
+                </Badge>
+              )}
               {product.category && (
                 <Badge variant="secondary">{product.category}</Badge>
               )}
@@ -334,7 +340,7 @@ export default function ProductDetail() {
             {/* WhatsApp Buttons */}
             <div className="flex gap-3 mb-6">
               <a
-                href={`https://wa.me/254700444448?text=${encodeURIComponent(`Hi, I'd like to order: ${product.name} (KSh ${product.base_price.toLocaleString()})`)}`}
+                href={`https://wa.me/254700444448?text=${encodeURIComponent(`Hi, I'd like to order: ${product.name}${!siteSettings.hide_pricing ? ` (KSh ${product.base_price.toLocaleString()})` : ''}`)}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex-1"

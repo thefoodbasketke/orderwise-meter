@@ -26,9 +26,11 @@ interface ProductQuickViewProps {
   product: Product | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  hidePricing?: boolean;
+  hideStock?: boolean;
 }
 
-export function ProductQuickView({ product, open, onOpenChange }: ProductQuickViewProps) {
+export function ProductQuickView({ product, open, onOpenChange, hidePricing = false, hideStock = false }: ProductQuickViewProps) {
   if (!product) return null;
 
   return (
@@ -66,14 +68,18 @@ export function ProductQuickView({ product, open, onOpenChange }: ProductQuickVi
               {product.category && (
                 <Badge variant="secondary">{product.category}</Badge>
               )}
-              <Badge variant={product.stock > 0 ? "default" : "destructive"}>
-                {product.stock > 0 ? `${product.stock} in stock` : "Out of stock"}
-              </Badge>
+              {!hideStock && (
+                <Badge variant={product.stock > 0 ? "default" : "destructive"}>
+                  {product.stock > 0 ? `${product.stock} in stock` : "Out of stock"}
+                </Badge>
+              )}
             </div>
             
-            <p className="text-2xl font-bold text-primary mb-4">
-              KSh {product.base_price.toLocaleString()}
-            </p>
+            {!hidePricing && (
+              <p className="text-2xl font-bold text-primary mb-4">
+                KSh {product.base_price.toLocaleString()}
+              </p>
+            )}
             
             <p className="text-muted-foreground mb-4 flex-1">
               {product.description || "No description available"}
@@ -103,12 +109,12 @@ export function ProductQuickView({ product, open, onOpenChange }: ProductQuickVi
             <div className="space-y-2 mt-auto">
               <div className="flex gap-2">
                 <a
-                  href={`https://wa.me/254700444448?text=${encodeURIComponent(`Hi, I'd like to order: ${product.name} (KSh ${product.base_price.toLocaleString()})`)}`}
+                  href={`https://wa.me/254700444448?text=${encodeURIComponent(`Hi, I'd like to order: ${product.name}${!hidePricing ? ` (KSh ${product.base_price.toLocaleString()})` : ''}`)}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex-1"
                 >
-                  <Button className="w-full bg-green-600 hover:bg-green-700" disabled={product.stock === 0}>
+                  <Button className="w-full bg-green-600 hover:bg-green-700" disabled={!hideStock && product.stock === 0}>
                     <MessageCircle className="h-4 w-4 mr-2" />
                     Order via WhatsApp
                   </Button>

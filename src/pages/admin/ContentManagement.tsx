@@ -12,7 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Edit, Trash2, ArrowLeft, FileText, Briefcase, Star, FolderOpen, Settings, Image } from "lucide-react";
+import { Plus, Edit, Trash2, ArrowLeft, FileText, Briefcase, Star, FolderOpen, Settings, Image, Eye, EyeOff } from "lucide-react";
 import { Link } from "react-router-dom";
 import HeroBannerManager from "@/components/admin/HeroBannerManager";
 
@@ -79,6 +79,13 @@ interface Career {
   application_deadline: string | null;
 }
 
+interface SiteSetting {
+  id: string;
+  setting_key: string;
+  setting_value: boolean;
+  description: string | null;
+}
+
 export default function ContentManagement() {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("hero");
@@ -89,6 +96,7 @@ export default function ContentManagement() {
   const [services, setServices] = useState<Service[]>([]);
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
   const [careers, setCareers] = useState<Career[]>([]);
+  const [siteSettings, setSiteSettings] = useState<SiteSetting[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Dialog states
@@ -105,12 +113,13 @@ export default function ContentManagement() {
 
   const fetchAllContent = async () => {
     try {
-      const [contentRes, projectsRes, servicesRes, testimonialsRes, careersRes] = await Promise.all([
+      const [contentRes, projectsRes, servicesRes, testimonialsRes, careersRes, settingsRes] = await Promise.all([
         supabase.from("site_content").select("*").order("sort_order"),
         supabase.from("projects").select("*").order("sort_order"),
         supabase.from("services").select("*").order("sort_order"),
         supabase.from("testimonials").select("*").order("sort_order"),
         supabase.from("careers").select("*").order("created_at", { ascending: false }),
+        supabase.from("site_settings").select("*"),
       ]);
 
       if (contentRes.data) setSiteContent(contentRes.data);
@@ -118,6 +127,7 @@ export default function ContentManagement() {
       if (servicesRes.data) setServices(servicesRes.data);
       if (testimonialsRes.data) setTestimonials(testimonialsRes.data);
       if (careersRes.data) setCareers(careersRes.data);
+      if (settingsRes.data) setSiteSettings(settingsRes.data);
     } catch (error: any) {
       toast({ variant: "destructive", title: "Error", description: "Failed to load content" });
     } finally {
@@ -288,6 +298,17 @@ export default function ContentManagement() {
     }
   };
 
+  // Toggle settings
+  const toggleSetting = async (settingKey: string, currentValue: boolean) => {
+    try {
+      await supabase.from("site_settings").update({ setting_value: !currentValue }).eq("setting_key", settingKey);
+      toast({ title: "Success", description: "Setting updated" });
+      fetchAllContent();
+    } catch (error: any) {
+      toast({ variant: "destructive", title: "Error", description: error.message });
+    }
+  };
+
   // Toggle active status
   const toggleActive = async (table: "site_content" | "projects" | "services" | "testimonials" | "careers", id: string, currentStatus: boolean) => {
     try {
@@ -331,6 +352,7 @@ export default function ContentManagement() {
             <TabsTrigger value="services"><FileText className="h-4 w-4 mr-1" />Services</TabsTrigger>
             <TabsTrigger value="testimonials"><Star className="h-4 w-4 mr-1" />Testimonials</TabsTrigger>
             <TabsTrigger value="careers"><Briefcase className="h-4 w-4 mr-1" />Careers</TabsTrigger>
+            <TabsTrigger value="visibility"><Eye className="h-4 w-4 mr-1" />Visibility</TabsTrigger>
           </TabsList>
 
 
@@ -759,6 +781,60 @@ export default function ContentManagement() {
                     ))}
                   </TableBody>
                 </Table>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Visibility Settings Tab */}
+          <TabsContent value="visibility">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Eye className="h-5 w-5" />
+                  Product Visibility Settings
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <p className="text-sm text-muted-foreground">
+                  Control what information is visible to customers on product pages.
+                </p>
+                
+                {siteSettings.map((setting) => (
+                  <div key={setting.id} className="flex items-center justify-between p-4 border rounded-lg">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        {setting.setting_value ? (
+                          <EyeOff className="h-5 w-5 text-muted-foreground" />
+                        ) : (
+                          <Eye className="h-5 w-5 text-primary" />
+                        )}
+                        <h4 className="font-medium capitalize">
+                          {setting.setting_key.replace(/_/g, ' ')}
+                        </h4>
+                      </div>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        {setting.description || `Toggle to ${setting.setting_value ? 'show' : 'hide'} this information`}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className="text-sm text-muted-foreground">
+                        {setting.setting_value ? 'Hidden' : 'Visible'}
+                      </span>
+                      <Switch
+                        checked={setting.setting_value}
+                        onCheckedChange={() => toggleSetting(setting.setting_key, setting.setting_value)}
+                      />
+                    </div>
+                  </div>
+                ))}
+                
+                <div className="bg-muted/50 p-4 rounded-lg">
+                  <h4 className="font-medium mb-2">How it works</h4>
+                  <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside">
+                    <li><strong>Hide Pricing:</strong> Removes price displays from product cards, detail pages, and quick view modals</li>
+                    <li><strong>Hide Stock:</strong> Removes stock quantity badges from all product displays</li>
+                  </ul>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
