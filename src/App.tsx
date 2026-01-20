@@ -41,9 +41,11 @@ import AdminProjects from "./pages/admin/Projects";
 import AdminBlogs from "./pages/admin/Blogs";
 import AdminGallery from "./pages/admin/Gallery";
 import AdminVideoShowcase from "./pages/admin/VideoShowcase";
+import AdminKnowledgeBase from "./pages/admin/KnowledgeBase";
 
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { WhatsAppFloat } from "./components/WhatsAppFloat";
+import { AIChatbot } from "./components/AIChatbot";
 
 const queryClient = new QueryClient();
 
@@ -94,11 +96,13 @@ const App = () => (
               <Route path="/admin/blogs" element={<ProtectedRoute requireAdmin><AdminBlogs /></ProtectedRoute>} />
               <Route path="/admin/gallery" element={<ProtectedRoute requireAdmin><AdminGallery /></ProtectedRoute>} />
               <Route path="/admin/video-showcase" element={<ProtectedRoute requireAdmin><AdminVideoShowcase /></ProtectedRoute>} />
+              <Route path="/admin/knowledge-base" element={<ProtectedRoute requireAdmin><AdminKnowledgeBase /></ProtectedRoute>} />
               
               <Route path="*" element={<NotFound />} />
             </Routes>
           </AnimatePresence>
           <WhatsAppFloat />
+          <AIChatbot />
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>

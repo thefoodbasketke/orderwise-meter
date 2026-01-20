@@ -5,7 +5,7 @@ import { Navbar } from "@/components/Navbar";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { AnimatedPage, FadeIn, StaggerContainer, StaggerItem } from "@/components/AnimatedPage";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Package, ShoppingCart, MessageSquare, DollarSign, Gauge, FileText, Settings, FileEdit, Image, Video } from "lucide-react";
+import { Package, ShoppingCart, MessageSquare, DollarSign, Gauge, FileText, Settings, FileEdit, Image, Video, Bot } from "lucide-react";
 
 interface Stats {
   totalProducts: number;
@@ -225,6 +225,16 @@ export default function AdminDashboard() {
                             Video Showcase
                           </div>
                           <div className="text-sm text-muted-foreground">Manage homepage featured videos</div>
+                        </Link>
+                        <Link
+                          to="/admin/knowledge-base"
+                          className="block p-3 rounded-lg hover:bg-muted transition-colors"
+                        >
+                          <div className="font-semibold flex items-center gap-2">
+                            <Bot className="h-4 w-4" />
+                            AI Knowledge Base
+                          </div>
+                          <div className="text-sm text-muted-foreground">Manage chatbot knowledge and responses</div>
                         </Link>
                       </CardContent>
                     </Card>
