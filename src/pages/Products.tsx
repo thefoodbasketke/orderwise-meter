@@ -11,6 +11,8 @@ import { useToast } from "@/hooks/use-toast";
 import { ProductQuickView } from "@/components/ProductQuickView";
 import { CompareProvider, CompareButton, CompareDrawer } from "@/components/CompareProducts";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
+import { motion } from "framer-motion";
+import { FadeIn, SectionHeading, GridItem } from "@/components/AnimatedPage";
 import { Package, Search, Filter, Zap, Droplets, Flame, Grid3X3, MessageCircle, Eye, Scale, Tag } from "lucide-react";
 
 interface Product {
@@ -166,16 +168,31 @@ function ProductsContent({
       <Navbar />
 
       {/* Hero Section */}
-      <section className="bg-gradient-hero py-12 md:py-16">
+      <motion.section 
+        className="bg-gradient-hero py-12 md:py-16"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5 }}
+      >
         <div className="container mx-auto px-4 text-center">
-          <h1 className="text-3xl md:text-4xl font-bold text-primary-foreground mb-2">
+          <motion.h1 
+            className="text-3xl md:text-4xl font-bold text-primary-foreground mb-2"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+          >
             Our Products
-          </h1>
-          <p className="text-primary-foreground/80 max-w-xl mx-auto">
+          </motion.h1>
+          <motion.p 
+            className="text-primary-foreground/80 max-w-xl mx-auto"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+          >
             Quality prepaid meters with competitive KES pricing
-          </p>
+          </motion.p>
         </div>
-      </section>
+      </motion.section>
 
       <div className="container mx-auto px-4 py-8">
         {/* Filters */}
@@ -226,101 +243,115 @@ function ProductsContent({
           </Card>
         ) : (
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {filteredProducts.map((product) => (
-              <Card key={product.id} className="group hover:shadow-hover transition-all duration-300">
-                <CardHeader className="p-0">
-                  <div className="aspect-square bg-muted rounded-t-lg overflow-hidden relative">
-                    {product.image_url ? (
-                      <img
-                        src={product.image_url}
-                        alt={product.name}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <Package className="h-16 w-16 text-muted-foreground" />
-                      </div>
-                    )}
-                    {/* Product Label */}
-                    {product.label && (
-                      <div className="absolute top-2 left-2">
-                        <Badge className="bg-accent text-accent-foreground shadow-md">
-                          <Tag className="h-3 w-3 mr-1" />
-                          {product.label}
-                        </Badge>
-                      </div>
-                    )}
-                    {/* Quick View & Compare Buttons */}
-                    <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Button
-                        size="sm"
-                        variant="secondary"
-                        onClick={() => setQuickViewProduct(product)}
+            {filteredProducts.map((product, index) => (
+              <GridItem key={product.id} index={index}>
+                <Card className="group hover:shadow-hover transition-all duration-300 h-full flex flex-col">
+                  <CardHeader className="p-0">
+                    <div className="aspect-square bg-muted rounded-t-lg overflow-hidden relative">
+                      {product.image_url ? (
+                        <motion.img
+                          src={product.image_url}
+                          alt={product.name}
+                          className="w-full h-full object-cover"
+                          whileHover={{ scale: 1.05 }}
+                          transition={{ duration: 0.3 }}
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <Package className="h-16 w-16 text-muted-foreground" />
+                        </div>
+                      )}
+                      {/* Product Label */}
+                      {product.label && (
+                        <motion.div 
+                          className="absolute top-2 left-2"
+                          initial={{ opacity: 0, scale: 0.8 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          transition={{ delay: 0.2 }}
+                        >
+                          <Badge className="bg-accent text-accent-foreground shadow-md">
+                            <Tag className="h-3 w-3 mr-1" />
+                            {product.label}
+                          </Badge>
+                        </motion.div>
+                      )}
+                      {/* Quick View & Compare Buttons */}
+                      <motion.div 
+                        className="absolute top-2 right-2 flex gap-1"
+                        initial={{ opacity: 0 }}
+                        whileHover={{ opacity: 1 }}
                       >
-                        <Eye className="h-4 w-4 mr-1" />
-                        Quick View
-                      </Button>
+                        <Button
+                          size="sm"
+                          variant="secondary"
+                          onClick={() => setQuickViewProduct(product)}
+                          className="opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <Eye className="h-4 w-4 mr-1" />
+                          Quick View
+                        </Button>
+                      </motion.div>
+                      <div className="absolute bottom-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <CompareButton product={product} />
+                      </div>
                     </div>
-                    <div className="absolute bottom-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <CompareButton product={product} />
+                  </CardHeader>
+                  <CardContent className="p-4 flex-grow">
+                    <CardTitle className="text-lg mb-2">{product.name}</CardTitle>
+                    <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
+                      {product.description}
+                    </p>
+                    <div className="flex items-center justify-between mb-2">
+                      {!siteSettings.hide_pricing && (
+                        <span className="text-xl font-bold text-primary">
+                          KSh {product.base_price.toLocaleString()}
+                        </span>
+                      )}
+                      {!siteSettings.hide_stock && (
+                        <Badge variant={product.stock > 0 ? "default" : "destructive"}>
+                          {product.stock > 0 ? `${product.stock} in stock` : "Out of stock"}
+                        </Badge>
+                      )}
                     </div>
-                  </div>
-                </CardHeader>
-                <CardContent className="p-4">
-                  <CardTitle className="text-lg mb-2">{product.name}</CardTitle>
-                  <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
-                    {product.description}
-                  </p>
-                  <div className="flex items-center justify-between mb-2">
-                    {!siteSettings.hide_pricing && (
-                      <span className="text-xl font-bold text-primary">
-                        KSh {product.base_price.toLocaleString()}
-                      </span>
-                    )}
-                    {!siteSettings.hide_stock && (
-                      <Badge variant={product.stock > 0 ? "default" : "destructive"}>
-                        {product.stock > 0 ? `${product.stock} in stock` : "Out of stock"}
+                    {product.category && (
+                      <Badge variant="secondary" className="text-xs">
+                        {product.category}
                       </Badge>
                     )}
-                  </div>
-                  {product.category && (
-                    <Badge variant="secondary" className="text-xs">
-                      {product.category}
-                    </Badge>
-                  )}
-                </CardContent>
-                <CardFooter className="p-4 pt-0 flex flex-col gap-2">
-                  <Link to={`/products/${product.id}`} className="w-full">
-                    <Button className="w-full" disabled={!siteSettings.hide_stock && product.stock === 0}>
-                      View Details
-                    </Button>
-                  </Link>
-                  <div className="flex gap-2 w-full">
-                    <a
-                      href={`https://wa.me/254700444448?text=${encodeURIComponent(`Hi, I'd like to order: ${product.name}${!siteSettings.hide_pricing ? ` (KSh ${product.base_price.toLocaleString()})` : ''}`)}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex-1"
-                    >
-                      <Button variant="default" className="w-full bg-green-600 hover:bg-green-700">
-                        <MessageCircle className="h-4 w-4 mr-1" />
-                        Order
+                  </CardContent>
+                  <CardFooter className="p-4 pt-0 flex flex-col gap-2">
+                    <Link to={`/products/${product.id}`} className="w-full">
+                      <Button className="w-full" disabled={!siteSettings.hide_stock && product.stock === 0}>
+                        View Details
                       </Button>
-                    </a>
-                    <a
-                      href={`https://wa.me/254700444448?text=${encodeURIComponent(`Hi, I'd like to enquire about: ${product.name}`)}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex-1"
-                    >
-                      <Button variant="outline" className="w-full">
-                        <MessageCircle className="h-4 w-4 mr-1" />
-                        Enquire
-                      </Button>
-                    </a>
-                  </div>
-                </CardFooter>
-              </Card>
+                    </Link>
+                    <div className="flex gap-2 w-full">
+                      <a
+                        href={`https://wa.me/254700444448?text=${encodeURIComponent(`Hi, I'd like to order: ${product.name}${!siteSettings.hide_pricing ? ` (KSh ${product.base_price.toLocaleString()})` : ''}`)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex-1"
+                      >
+                        <Button variant="default" className="w-full bg-green-600 hover:bg-green-700">
+                          <MessageCircle className="h-4 w-4 mr-1" />
+                          Order
+                        </Button>
+                      </a>
+                      <a
+                        href={`https://wa.me/254700444448?text=${encodeURIComponent(`Hi, I'd like to enquire about: ${product.name}`)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex-1"
+                      >
+                        <Button variant="outline" className="w-full">
+                          <MessageCircle className="h-4 w-4 mr-1" />
+                          Enquire
+                        </Button>
+                      </a>
+                    </div>
+                  </CardFooter>
+                </Card>
+              </GridItem>
             ))}
           </div>
         )}

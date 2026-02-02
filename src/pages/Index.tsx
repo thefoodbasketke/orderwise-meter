@@ -8,6 +8,16 @@ import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { motion } from "framer-motion";
+import { 
+  FadeIn, 
+  StaggerContainer, 
+  StaggerItem, 
+  HeroText, 
+  SectionHeading, 
+  GridItem,
+  Float
+} from "@/components/AnimatedPage";
 import { 
   ShoppingBag, 
   MessageSquare, 
@@ -416,44 +426,62 @@ export default function Index() {
       {/* Stats Section */}
       <section className="py-12 bg-muted/30">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            {stats.map((stat, index) => (
-              <div key={index} className="text-center">
-                <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-3">
-                  <stat.icon className="h-6 w-6 text-primary" />
-                </div>
-                <div className="text-3xl font-bold text-primary mb-1">{stat.value}</div>
-                <div className="text-sm text-muted-foreground">{stat.label}</div>
-              </div>
-            ))}
-          </div>
+          <StaggerContainer staggerDelay={0.15}>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+              {stats.map((stat, index) => (
+                <StaggerItem key={index}>
+                  <motion.div 
+                    className="text-center"
+                    whileHover={{ scale: 1.05 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <motion.div 
+                      className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-3"
+                      whileHover={{ rotate: 360 }}
+                      transition={{ duration: 0.5 }}
+                    >
+                      <stat.icon className="h-6 w-6 text-primary" />
+                    </motion.div>
+                    <div className="text-3xl font-bold text-primary mb-1">{stat.value}</div>
+                    <div className="text-sm text-muted-foreground">{stat.label}</div>
+                  </motion.div>
+                </StaggerItem>
+              ))}
+            </div>
+          </StaggerContainer>
         </div>
       </section>
 
       {/* Product Categories */}
       <section className="py-20">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
+          <SectionHeading className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">Our Meter Solutions</h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
               We offer a comprehensive range of smart metering solutions for all your utility needs
             </p>
-          </div>
+          </SectionHeading>
           
           <div className="grid md:grid-cols-3 gap-8">
             {meterCategories.map((category, index) => (
-              <Card key={index} className="group hover:shadow-hover transition-all duration-300 border-2 hover:border-primary/20">
-                <CardContent className="p-8">
-                  <div className={`h-16 w-16 rounded-2xl ${category.color} flex items-center justify-center mb-6 group-hover:scale-110 transition-transform`}>
-                    <category.icon className="h-8 w-8" />
-                  </div>
-                  <h3 className="text-xl font-semibold mb-3">{category.title}</h3>
-                  <p className="text-muted-foreground mb-4">{category.description}</p>
-                  <Link to="/products" className="text-primary font-medium inline-flex items-center group-hover:gap-2 transition-all">
-                    View Products <ArrowRight className="h-4 w-4 ml-1" />
-                  </Link>
-                </CardContent>
-              </Card>
+              <GridItem key={index} index={index}>
+                <Card className="group hover:shadow-hover transition-all duration-300 border-2 hover:border-primary/20 h-full">
+                  <CardContent className="p-8">
+                    <motion.div 
+                      className={`h-16 w-16 rounded-2xl ${category.color} flex items-center justify-center mb-6`}
+                      whileHover={{ scale: 1.1, rotate: 5 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <category.icon className="h-8 w-8" />
+                    </motion.div>
+                    <h3 className="text-xl font-semibold mb-3">{category.title}</h3>
+                    <p className="text-muted-foreground mb-4">{category.description}</p>
+                    <Link to="/products" className="text-primary font-medium inline-flex items-center group-hover:gap-2 transition-all">
+                      View Products <ArrowRight className="h-4 w-4 ml-1" />
+                    </Link>
+                  </CardContent>
+                </Card>
+              </GridItem>
             ))}
           </div>
         </div>
