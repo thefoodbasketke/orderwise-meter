@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { ShoppingCart, User, LogOut, LayoutDashboard, Menu, ChevronDown, ExternalLink, Key, Building2 } from "lucide-react";
+import { motion } from "framer-motion";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -33,6 +34,15 @@ const moreLinks = [
   { href: "/register-meter", label: "Register Meter" },
 ];
 
+const navItemVariants = {
+  hidden: { opacity: 0, y: -10 },
+  visible: (i: number) => ({
+    opacity: 1,
+    y: 0,
+    transition: { delay: i * 0.05, duration: 0.3 }
+  })
+};
+
 export function Navbar() {
   const { user, isAdmin, signOut } = useAuth();
 
@@ -45,30 +55,52 @@ export function Navbar() {
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-1">
-            {navLinks.map((link) => (
-              <Link key={link.href} to={link.href}>
-                <Button variant="ghost" size="sm">{link.label}</Button>
-              </Link>
+          <motion.div 
+            className="hidden md:flex items-center space-x-1"
+            initial="hidden"
+            animate="visible"
+          >
+            {navLinks.map((link, i) => (
+              <motion.div key={link.href} custom={i} variants={navItemVariants}>
+                <Link to={link.href}>
+                  <Button variant="ghost" size="sm" className="relative overflow-hidden group">
+                    <span className="relative z-10">{link.label}</span>
+                    <motion.span 
+                      className="absolute bottom-0 left-0 h-0.5 bg-primary"
+                      initial={{ width: 0 }}
+                      whileHover={{ width: "100%" }}
+                      transition={{ duration: 0.2 }}
+                    />
+                  </Button>
+                </Link>
+              </motion.div>
             ))}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm">
-                  More <ChevronDown className="ml-1 h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                {moreLinks.map((link) => (
-                  <DropdownMenuItem key={link.href} asChild>
-                    <Link to={link.href} className="cursor-pointer w-full">
-                      {link.label}
-                    </Link>
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-
-          </div>
+            <motion.div custom={navLinks.length} variants={navItemVariants}>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm" className="group">
+                    More 
+                    <motion.span
+                      animate={{ rotate: 0 }}
+                      whileHover={{ rotate: 180 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <ChevronDown className="ml-1 h-4 w-4" />
+                    </motion.span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="animate-fade-in">
+                  {moreLinks.map((link) => (
+                    <DropdownMenuItem key={link.href} asChild>
+                      <Link to={link.href} className="cursor-pointer w-full">
+                        {link.label}
+                      </Link>
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </motion.div>
+          </motion.div>
 
           <div className="flex items-center space-x-2">
             {user ? (

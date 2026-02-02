@@ -3,6 +3,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Navbar } from "@/components/Navbar";
 import { Card, CardContent } from "@/components/ui/card";
 import { Footer } from "@/components/Footer";
+import { motion } from "framer-motion";
+import { FadeIn, SlideIn, SectionHeading, StaggerContainer, StaggerItem, GridItem } from "@/components/AnimatedPage";
 import { 
   Target, 
   Eye, 
@@ -93,22 +95,37 @@ export default function About() {
       <Navbar />
       
       {/* Hero Section */}
-      <section className="bg-gradient-hero py-16 md:py-24">
+      <motion.section 
+        className="bg-gradient-hero py-16 md:py-24"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5 }}
+      >
         <div className="container mx-auto px-4 text-center">
-          <h1 className="text-4xl md:text-5xl font-bold text-primary-foreground mb-4">
+          <motion.h1 
+            className="text-4xl md:text-5xl font-bold text-primary-foreground mb-4"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+          >
             {aboutIntro.title}
-          </h1>
-          <p className="text-xl text-primary-foreground/80 max-w-2xl mx-auto">
+          </motion.h1>
+          <motion.p 
+            className="text-xl text-primary-foreground/80 max-w-2xl mx-auto"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+          >
             Kenya's trusted partner in utility metering solutions since establishment
-          </p>
+          </motion.p>
         </div>
-      </section>
+      </motion.section>
 
       {/* Company Background */}
       <section className="py-16">
         <div className="container mx-auto px-4">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div>
+            <SlideIn direction="left">
               <h2 className="text-3xl font-bold mb-6">Our Story</h2>
               <p className="text-muted-foreground mb-4">
                 {aboutIntro.content}
@@ -122,24 +139,35 @@ export default function About() {
                 We work directly with manufacturers to ensure our products meet the highest quality 
                 standards while remaining affordable for our customers.
               </p>
-            </div>
-            <div className="bg-muted/30 rounded-2xl p-8">
-              <div className="flex items-center gap-4 mb-6">
-                <Building2 className="h-12 w-12 text-primary" />
-                <div>
-                  <h3 className="font-semibold text-lg">Our Location</h3>
-                  <p className="text-muted-foreground">Capital One Plaza, Eastern Bypass Off Thika Road</p>
-                </div>
-              </div>
-              <div className="space-y-3">
-                {certifications.map((cert, index) => (
-                  <div key={index} className="flex items-center gap-2 text-sm">
-                    <CheckCircle2 className="h-4 w-4 text-primary" />
-                    <span>{cert}</span>
+            </SlideIn>
+            <SlideIn direction="right">
+              <div className="bg-muted/30 rounded-2xl p-8">
+                <div className="flex items-center gap-4 mb-6">
+                  <motion.div
+                    whileHover={{ rotate: 360 }}
+                    transition={{ duration: 0.5 }}
+                  >
+                    <Building2 className="h-12 w-12 text-primary" />
+                  </motion.div>
+                  <div>
+                    <h3 className="font-semibold text-lg">Our Location</h3>
+                    <p className="text-muted-foreground">Capital One Plaza, Eastern Bypass Off Thika Road</p>
                   </div>
-                ))}
+                </div>
+                <StaggerContainer>
+                  <div className="space-y-3">
+                    {certifications.map((cert, index) => (
+                      <StaggerItem key={index}>
+                        <div className="flex items-center gap-2 text-sm">
+                          <CheckCircle2 className="h-4 w-4 text-primary" />
+                          <span>{cert}</span>
+                        </div>
+                      </StaggerItem>
+                    ))}
+                  </div>
+                </StaggerContainer>
               </div>
-            </div>
+            </SlideIn>
           </div>
         </div>
       </section>
@@ -162,29 +190,41 @@ export default function About() {
       <section className="py-16 bg-muted/30">
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-2 gap-8">
-            <Card className="border-2 border-primary/20">
-              <CardContent className="p-8">
-                <div className="h-14 w-14 rounded-xl bg-primary/10 flex items-center justify-center mb-6">
-                  <Target className="h-7 w-7 text-primary" />
-                </div>
-                <h3 className="text-2xl font-bold mb-4">{mission.title}</h3>
-                <p className="text-muted-foreground">
-                  {mission.content}
-                </p>
-              </CardContent>
-            </Card>
+            <GridItem index={0}>
+              <Card className="border-2 border-primary/20 h-full">
+                <CardContent className="p-8">
+                  <motion.div 
+                    className="h-14 w-14 rounded-xl bg-primary/10 flex items-center justify-center mb-6"
+                    whileHover={{ scale: 1.1, rotate: 5 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <Target className="h-7 w-7 text-primary" />
+                  </motion.div>
+                  <h3 className="text-2xl font-bold mb-4">{mission.title}</h3>
+                  <p className="text-muted-foreground">
+                    {mission.content}
+                  </p>
+                </CardContent>
+              </Card>
+            </GridItem>
             
-            <Card className="border-2 border-accent/20">
-              <CardContent className="p-8">
-                <div className="h-14 w-14 rounded-xl bg-accent/10 flex items-center justify-center mb-6">
-                  <Eye className="h-7 w-7 text-accent" />
-                </div>
-                <h3 className="text-2xl font-bold mb-4">{vision.title}</h3>
-                <p className="text-muted-foreground">
-                  {vision.content}
-                </p>
-              </CardContent>
-            </Card>
+            <GridItem index={1}>
+              <Card className="border-2 border-accent/20 h-full">
+                <CardContent className="p-8">
+                  <motion.div 
+                    className="h-14 w-14 rounded-xl bg-accent/10 flex items-center justify-center mb-6"
+                    whileHover={{ scale: 1.1, rotate: 5 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <Eye className="h-7 w-7 text-accent" />
+                  </motion.div>
+                  <h3 className="text-2xl font-bold mb-4">{vision.title}</h3>
+                  <p className="text-muted-foreground">
+                    {vision.content}
+                  </p>
+                </CardContent>
+              </Card>
+            </GridItem>
           </div>
         </div>
       </section>
@@ -192,24 +232,30 @@ export default function About() {
       {/* Core Values */}
       <section className="py-16">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
+          <SectionHeading className="text-center mb-12">
             <h2 className="text-3xl font-bold mb-4">Our Core Values</h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
               These values guide everything we do at UMS Kenya
             </p>
-          </div>
+          </SectionHeading>
           
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {values.map((value, index) => (
-              <Card key={index} className="text-center hover:shadow-hover transition-shadow">
-                <CardContent className="p-6">
-                  <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
-                    <value.icon className="h-6 w-6 text-primary" />
-                  </div>
-                  <h3 className="font-semibold mb-2">{value.title}</h3>
-                  <p className="text-sm text-muted-foreground">{value.description}</p>
-                </CardContent>
-              </Card>
+              <GridItem key={index} index={index}>
+                <Card className="text-center hover:shadow-hover transition-shadow h-full">
+                  <CardContent className="p-6">
+                    <motion.div 
+                      className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4"
+                      whileHover={{ scale: 1.1, rotate: 360 }}
+                      transition={{ duration: 0.5 }}
+                    >
+                      <value.icon className="h-6 w-6 text-primary" />
+                    </motion.div>
+                    <h3 className="font-semibold mb-2">{value.title}</h3>
+                    <p className="text-sm text-muted-foreground">{value.description}</p>
+                  </CardContent>
+                </Card>
+              </GridItem>
             ))}
           </div>
         </div>
