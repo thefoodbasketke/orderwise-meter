@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { Card, CardContent } from "@/components/ui/card";
@@ -13,7 +13,9 @@ import {
   Mail, 
   MapPin, 
   Clock,
-  Send
+  Send,
+  CheckCircle2,
+  Sparkles
 } from "lucide-react";
 import { z } from "zod";
 import { FadeIn, SlideIn, StaggerContainer, GridItem, SectionHeading } from "@/components/AnimatedPage";
@@ -43,6 +45,7 @@ export default function Contact() {
   });
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [showSuccessOverlay, setShowSuccessOverlay] = useState(false);
   const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -56,15 +59,15 @@ export default function Contact() {
       await new Promise(resolve => setTimeout(resolve, 1000));
       
       setSuccess(true);
-      toast({
-        title: "Message Sent!",
-        description: "We'll get back to you as soon as possible.",
-      });
+      setShowSuccessOverlay(true);
       
       setFormData({ name: "", email: "", phone: "", subject: "", message: "" });
       
       // Reset success state after animation
-      setTimeout(() => setSuccess(false), 2000);
+      setTimeout(() => {
+        setSuccess(false);
+        setShowSuccessOverlay(false);
+      }, 4000);
     } catch (error) {
       if (error instanceof z.ZodError) {
         toast({
@@ -78,8 +81,97 @@ export default function Contact() {
     }
   };
 
+  const SuccessOverlay = () => (
+    <AnimatePresence>
+      {showSuccessOverlay && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm"
+        >
+          <motion.div
+            initial={{ scale: 0.5, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.5, opacity: 0 }}
+            transition={{ type: "spring", stiffness: 300, damping: 25 }}
+            className="bg-card border border-border rounded-2xl p-8 shadow-2xl max-w-md mx-4 text-center relative overflow-hidden"
+          >
+            {/* Sparkle decorations */}
+            <motion.div
+              initial={{ opacity: 0, rotate: 0 }}
+              animate={{ opacity: 1, rotate: 360 }}
+              transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+              className="absolute top-4 right-4"
+            >
+              <Sparkles className="h-6 w-6 text-primary/40" />
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, rotate: 0 }}
+              animate={{ opacity: 1, rotate: -360 }}
+              transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+              className="absolute bottom-4 left-4"
+            >
+              <Sparkles className="h-5 w-5 text-primary/30" />
+            </motion.div>
+
+            {/* Success icon */}
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ type: "spring", stiffness: 400, damping: 15, delay: 0.1 }}
+              className="mx-auto mb-6 h-20 w-20 rounded-full bg-primary/10 flex items-center justify-center"
+            >
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: "spring", stiffness: 400, damping: 15, delay: 0.2 }}
+              >
+                <CheckCircle2 className="h-12 w-12 text-primary" />
+              </motion.div>
+            </motion.div>
+
+            {/* Success text */}
+            <motion.h3
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="text-2xl font-bold text-foreground mb-2"
+            >
+              Message Sent!
+            </motion.h3>
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+              className="text-muted-foreground mb-6"
+            >
+              Thank you for reaching out. Our team will get back to you within 24 hours.
+            </motion.p>
+
+            {/* Progress bar */}
+            <motion.div
+              className="h-1 bg-muted rounded-full overflow-hidden"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.5 }}
+            >
+              <motion.div
+                className="h-full bg-primary rounded-full"
+                initial={{ width: "100%" }}
+                animate={{ width: "0%" }}
+                transition={{ duration: 3.5, ease: "linear", delay: 0.5 }}
+              />
+            </motion.div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+
   return (
     <div className="min-h-screen bg-background">
+      <SuccessOverlay />
       <Navbar />
       
       {/* Hero Section */}
