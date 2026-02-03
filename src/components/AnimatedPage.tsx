@@ -43,25 +43,36 @@ export const FadeInScale = ({ children, delay = 0 }: { children: ReactNode; dela
   </motion.div>
 );
 
-// Slide in from left or right
+// Slide in from left, right, or up
 export const SlideIn = ({ 
   children, 
   direction = "left", 
   delay = 0 
 }: { 
   children: ReactNode; 
-  direction?: "left" | "right"; 
+  direction?: "left" | "right" | "up"; 
   delay?: number;
-}) => (
-  <motion.div
-    initial={{ opacity: 0, x: direction === "left" ? -50 : 50 }}
-    whileInView={{ opacity: 1, x: 0 }}
-    viewport={{ once: true, margin: "-50px" }}
-    transition={{ duration: 0.5, delay, ease: "easeOut" }}
-  >
-    {children}
-  </motion.div>
-);
+}) => {
+  const getInitialPosition = () => {
+    switch (direction) {
+      case "left": return { x: -50, y: 0 };
+      case "right": return { x: 50, y: 0 };
+      case "up": return { x: 0, y: 50 };
+      default: return { x: -50, y: 0 };
+    }
+  };
+  
+  return (
+    <motion.div
+      initial={{ opacity: 0, ...getInitialPosition() }}
+      whileInView={{ opacity: 1, x: 0, y: 0 }}
+      viewport={{ once: true, margin: "-50px" }}
+      transition={{ duration: 0.5, delay, ease: "easeOut" }}
+    >
+      {children}
+    </motion.div>
+  );
+};
 
 // Scale in animation
 export const ScaleIn = ({ children, delay = 0 }: { children: ReactNode; delay?: number }) => (
@@ -76,8 +87,17 @@ export const ScaleIn = ({ children, delay = 0 }: { children: ReactNode; delay?: 
 );
 
 // Stagger container for child animations
-export const StaggerContainer = ({ children, staggerDelay = 0.1 }: { children: ReactNode; staggerDelay?: number }) => (
+export const StaggerContainer = ({ 
+  children, 
+  staggerDelay = 0.1,
+  className = ""
+}: { 
+  children: ReactNode; 
+  staggerDelay?: number;
+  className?: string;
+}) => (
   <motion.div
+    className={className}
     initial="hidden"
     whileInView="visible"
     viewport={{ once: true, margin: "-50px" }}
