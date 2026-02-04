@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { MessageCircle, X, Send, Bot, User, Loader2 } from "lucide-react";
+import { MessageCircle, X, Send, Bot, User, Loader2, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -13,6 +13,175 @@ type Message = {
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-chat`;
 
+// Typing indicator component with animated dots
+const TypingIndicator = () => (
+  <div className="flex gap-1 items-center px-3 py-2">
+    {[0, 1, 2].map((i) => (
+      <motion.div
+        key={i}
+        className="w-2 h-2 bg-primary/60 rounded-full"
+        animate={{
+          y: [0, -6, 0],
+          opacity: [0.5, 1, 0.5],
+        }}
+        transition={{
+          duration: 0.6,
+          repeat: Infinity,
+          delay: i * 0.15,
+          ease: "easeInOut",
+        }}
+      />
+    ))}
+  </div>
+);
+
+// Message bubble component with animations
+const MessageBubble = ({ 
+  message, 
+  index, 
+  isLatest 
+}: { 
+  message: Message; 
+  index: number; 
+  isLatest: boolean;
+}) => {
+  const isUser = message.role === "user";
+  
+  return (
+    <motion.div
+      initial={{ 
+        opacity: 0, 
+        y: 20, 
+        x: isUser ? 20 : -20,
+        scale: 0.9 
+      }}
+      animate={{ 
+        opacity: 1, 
+        y: 0, 
+        x: 0,
+        scale: 1 
+      }}
+      transition={{ 
+        duration: 0.3,
+        ease: [0.25, 0.46, 0.45, 0.94],
+        delay: isLatest ? 0 : index * 0.05
+      }}
+      className={`flex gap-2 ${isUser ? "justify-end" : "justify-start"}`}
+    >
+      {!isUser && (
+        <motion.div 
+          className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0"
+          initial={{ scale: 0, rotate: -180 }}
+          animate={{ scale: 1, rotate: 0 }}
+          transition={{ 
+            type: "spring", 
+            stiffness: 260, 
+            damping: 20,
+            delay: 0.1
+          }}
+        >
+          <Bot className="h-4 w-4 text-primary" />
+        </motion.div>
+      )}
+      <motion.div
+        className={`max-w-[80%] rounded-2xl px-4 py-2.5 text-sm shadow-sm ${
+          isUser
+            ? "bg-primary text-primary-foreground rounded-br-md"
+            : "bg-muted rounded-bl-md"
+        }`}
+        whileHover={{ scale: 1.02 }}
+        transition={{ type: "spring", stiffness: 400, damping: 25 }}
+      >
+        {/* Render message content with streaming effect for assistant */}
+        {!isUser && isLatest ? (
+          <motion.span
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.2 }}
+          >
+            {message.content}
+            {message.content.length > 0 && (
+              <motion.span
+                className="inline-block w-0.5 h-4 bg-primary/50 ml-0.5 align-middle"
+                animate={{ opacity: [1, 0, 1] }}
+                transition={{ duration: 0.8, repeat: Infinity }}
+              />
+            )}
+          </motion.span>
+        ) : (
+          message.content
+        )}
+      </motion.div>
+      {isUser && (
+        <motion.div 
+          className="h-8 w-8 rounded-full bg-secondary flex items-center justify-center flex-shrink-0"
+          initial={{ scale: 0, rotate: 180 }}
+          animate={{ scale: 1, rotate: 0 }}
+          transition={{ 
+            type: "spring", 
+            stiffness: 260, 
+            damping: 20,
+            delay: 0.1
+          }}
+        >
+          <User className="h-4 w-4 text-secondary-foreground" />
+        </motion.div>
+      )}
+    </motion.div>
+  );
+};
+
+// Send button with ripple effect
+const SendButton = ({ 
+  onClick, 
+  disabled 
+}: { 
+  onClick: () => void; 
+  disabled: boolean;
+}) => {
+  const [ripple, setRipple] = useState(false);
+
+  const handleClick = () => {
+    if (disabled) return;
+    setRipple(true);
+    onClick();
+    setTimeout(() => setRipple(false), 600);
+  };
+
+  return (
+    <motion.div
+      whileHover={{ scale: disabled ? 1 : 1.05 }}
+      whileTap={{ scale: disabled ? 1 : 0.95 }}
+    >
+      <Button
+        onClick={handleClick}
+        disabled={disabled}
+        size="icon"
+        className="relative overflow-hidden"
+      >
+        <AnimatePresence>
+          {ripple && (
+            <motion.span
+              className="absolute inset-0 bg-white/30 rounded-full"
+              initial={{ scale: 0, opacity: 1 }}
+              animate={{ scale: 2.5, opacity: 0 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.6 }}
+            />
+          )}
+        </AnimatePresence>
+        <motion.div
+          animate={disabled ? { rotate: 0 } : {}}
+          whileHover={{ rotate: -45, x: 2, y: -2 }}
+          transition={{ type: "spring", stiffness: 400 }}
+        >
+          <Send className="h-4 w-4" />
+        </motion.div>
+      </Button>
+    </motion.div>
+  );
+};
+
 export const AIChatbot = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
@@ -20,6 +189,7 @@ export const AIChatbot = () => {
   ]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isTyping, setIsTyping] = useState(false);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -27,7 +197,7 @@ export const AIChatbot = () => {
     if (scrollAreaRef.current) {
       scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
     }
-  }, [messages]);
+  }, [messages, isTyping]);
 
   useEffect(() => {
     if (isOpen && inputRef.current) {
@@ -36,6 +206,8 @@ export const AIChatbot = () => {
   }, [isOpen]);
 
   const streamChat = async (messagesToSend: Message[]) => {
+    setIsTyping(true);
+    
     const resp = await fetch(CHAT_URL, {
       method: "POST",
       headers: {
@@ -52,6 +224,8 @@ export const AIChatbot = () => {
 
     if (!resp.body) throw new Error("No response body");
 
+    setIsTyping(false);
+    
     const reader = resp.body.getReader();
     const decoder = new TextDecoder();
     let textBuffer = "";
@@ -112,8 +286,8 @@ export const AIChatbot = () => {
     } catch (error) {
       console.error("Chat error:", error);
       toast.error(error instanceof Error ? error.message : "Failed to send message");
-      // Remove the last user message if there was an error
       setMessages(messages);
+      setIsTyping(false);
     } finally {
       setIsLoading(false);
     }
@@ -183,59 +357,88 @@ export const AIChatbot = () => {
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ opacity: 0, y: 20, scale: 0.95 }}
+            initial={{ opacity: 0, y: 20, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 20, scale: 0.95 }}
+            exit={{ opacity: 0, y: 20, scale: 0.9 }}
+            transition={{ type: "spring", stiffness: 300, damping: 25 }}
             className="fixed bottom-24 right-6 z-50 w-[360px] max-w-[calc(100vw-3rem)] bg-background border border-border rounded-xl shadow-2xl overflow-hidden"
           >
             {/* Header */}
-            <div className="bg-primary text-primary-foreground p-4 flex items-center justify-between">
+            <motion.div 
+              className="bg-primary text-primary-foreground p-4 flex items-center justify-between"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.1 }}
+            >
               <div className="flex items-center gap-2">
-                <Bot className="h-5 w-5" />
+                <motion.div
+                  animate={{ rotate: [0, 10, -10, 0] }}
+                  transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
+                >
+                  <Bot className="h-5 w-5" />
+                </motion.div>
                 <span className="font-semibold">UMS Assistant</span>
+                <motion.div
+                  animate={{ scale: [1, 1.2, 1] }}
+                  transition={{ duration: 1.5, repeat: Infinity }}
+                >
+                  <Sparkles className="h-3 w-3 text-yellow-300" />
+                </motion.div>
               </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setIsOpen(false)}
-                className="h-8 w-8 text-primary-foreground hover:bg-primary-foreground/20"
+              <motion.div
+                whileHover={{ rotate: 90 }}
+                transition={{ type: "spring", stiffness: 300 }}
               >
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setIsOpen(false)}
+                  className="h-8 w-8 text-primary-foreground hover:bg-primary-foreground/20"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </motion.div>
+            </motion.div>
 
             {/* Messages */}
             <ScrollArea className="h-[350px] p-4" ref={scrollAreaRef}>
               <div className="space-y-4">
-                {messages.map((message, index) => (
-                  <motion.div
-                    key={index}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className={`flex gap-2 ${message.role === "user" ? "justify-end" : "justify-start"}`}
-                  >
-                    {message.role === "assistant" && (
-                      <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                        <Bot className="h-4 w-4 text-primary" />
-                      </div>
-                    )}
-                    <div
-                      className={`max-w-[80%] rounded-lg px-3 py-2 text-sm ${
-                        message.role === "user"
-                          ? "bg-primary text-primary-foreground"
-                          : "bg-muted"
-                      }`}
+                <AnimatePresence mode="popLayout">
+                  {messages.map((message, index) => (
+                    <MessageBubble
+                      key={index}
+                      message={message}
+                      index={index}
+                      isLatest={index === messages.length - 1 && message.role === "assistant"}
+                    />
+                  ))}
+                </AnimatePresence>
+                
+                {/* Typing indicator */}
+                <AnimatePresence>
+                  {isTyping && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      className="flex gap-2 justify-start"
                     >
-                      {message.content}
-                    </div>
-                    {message.role === "user" && (
-                      <div className="h-8 w-8 rounded-full bg-secondary flex items-center justify-center flex-shrink-0">
-                        <User className="h-4 w-4 text-secondary-foreground" />
+                      <motion.div 
+                        className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center"
+                        animate={{ scale: [1, 1.1, 1] }}
+                        transition={{ duration: 0.8, repeat: Infinity }}
+                      >
+                        <Bot className="h-4 w-4 text-primary" />
+                      </motion.div>
+                      <div className="bg-muted rounded-2xl rounded-bl-md shadow-sm">
+                        <TypingIndicator />
                       </div>
-                    )}
-                  </motion.div>
-                ))}
-                {isLoading && messages[messages.length - 1]?.role === "user" && (
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+                
+                {/* Loading state when waiting for stream to start */}
+                {isLoading && !isTyping && messages[messages.length - 1]?.role === "user" && (
                   <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
@@ -244,7 +447,7 @@ export const AIChatbot = () => {
                     <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
                       <Bot className="h-4 w-4 text-primary" />
                     </div>
-                    <div className="bg-muted rounded-lg px-3 py-2">
+                    <div className="bg-muted rounded-2xl rounded-bl-md px-3 py-2 shadow-sm">
                       <Loader2 className="h-4 w-4 animate-spin" />
                     </div>
                   </motion.div>
@@ -253,26 +456,33 @@ export const AIChatbot = () => {
             </ScrollArea>
 
             {/* Input */}
-            <div className="p-4 border-t border-border">
+            <motion.div 
+              className="p-4 border-t border-border"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+            >
               <div className="flex gap-2">
-                <Input
-                  ref={inputRef}
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  onKeyDown={handleKeyPress}
-                  placeholder="Type your message..."
-                  disabled={isLoading}
+                <motion.div 
                   className="flex-1"
-                />
-                <Button
-                  onClick={handleSend}
-                  disabled={!input.trim() || isLoading}
-                  size="icon"
+                  whileFocus={{ scale: 1.01 }}
                 >
-                  <Send className="h-4 w-4" />
-                </Button>
+                  <Input
+                    ref={inputRef}
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    onKeyDown={handleKeyPress}
+                    placeholder="Type your message..."
+                    disabled={isLoading}
+                    className="transition-shadow focus:shadow-md"
+                  />
+                </motion.div>
+                <SendButton 
+                  onClick={handleSend} 
+                  disabled={!input.trim() || isLoading} 
+                />
               </div>
-            </div>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
