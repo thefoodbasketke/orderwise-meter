@@ -128,21 +128,53 @@ export const AIChatbot = () => {
 
   return (
     <>
-      {/* Chat Button */}
+      {/* Chat Button with Label */}
       <AnimatePresence>
         {!isOpen && (
           <motion.div
             initial={{ scale: 0, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0, opacity: 0 }}
-            className="fixed bottom-24 right-6 z-50"
+            className="fixed bottom-24 right-6 z-50 flex flex-col items-end gap-2"
           >
-            <Button
-              onClick={() => setIsOpen(true)}
-              className="h-14 w-14 rounded-full bg-primary hover:bg-primary/90 shadow-lg"
+            {/* Floating label */}
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 1, duration: 0.5 }}
+              className="bg-background border border-border rounded-lg px-3 py-2 shadow-lg max-w-[180px]"
             >
-              <MessageCircle className="h-6 w-6" />
-            </Button>
+              <motion.div
+                animate={{ scale: [1, 1.02, 1] }}
+                transition={{ repeat: Infinity, duration: 2 }}
+                className="flex items-center gap-2"
+              >
+                <span className="text-xs font-medium text-foreground">Need help? Chat with us!</span>
+                <motion.span
+                  animate={{ x: [0, 4, 0] }}
+                  transition={{ repeat: Infinity, duration: 1.5 }}
+                >
+                  👋
+                </motion.span>
+              </motion.div>
+            </motion.div>
+            
+            {/* Chat button */}
+            <motion.div
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <Button
+                onClick={() => setIsOpen(true)}
+                className="h-14 w-14 rounded-full bg-primary hover:bg-primary/90 shadow-lg relative"
+              >
+                <MessageCircle className="h-6 w-6" />
+                {/* Pulse indicator */}
+                <span className="absolute -top-1 -right-1 h-4 w-4 bg-emerald-500 rounded-full border-2 border-background">
+                  <span className="absolute inset-0 rounded-full bg-emerald-500 animate-ping opacity-75" />
+                </span>
+              </Button>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
