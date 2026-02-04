@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
-import { ShoppingCart, User, LogOut, LayoutDashboard, Menu, ChevronDown, ExternalLink, Key, Building2 } from "lucide-react";
+import { ShoppingCart, User, LogOut, LayoutDashboard, Menu, ChevronDown, ExternalLink, Key, Building2, Home } from "lucide-react";
 import { motion } from "framer-motion";
 import {
   DropdownMenu,
@@ -18,6 +18,7 @@ import {
 import umsLogo from "@/assets/ums-logo.png";
 
 const navLinks = [
+  { href: "/", label: "Home", icon: Home },
   { href: "/products", label: "Products" },
   { href: "/services", label: "Services" },
   { href: "/projects", label: "Projects" },
@@ -64,6 +65,7 @@ export function Navbar() {
               <motion.div key={link.href} custom={i} variants={navItemVariants}>
                 <Link to={link.href}>
                   <Button variant="ghost" size="sm" className="relative overflow-hidden group">
+                    {link.icon && <link.icon className="h-4 w-4 mr-1" />}
                     <span className="relative z-10">{link.label}</span>
                     <motion.span 
                       className="absolute bottom-0 left-0 h-0.5 bg-primary"
@@ -167,7 +169,8 @@ export function Navbar() {
               <SheetContent side="right" className="w-64">
                 <div className="flex flex-col space-y-4 mt-8">
                   {navLinks.map((link) => (
-                    <Link key={link.href} to={link.href} className="text-lg font-medium hover:text-primary">
+                    <Link key={link.href} to={link.href} className="flex items-center gap-2 text-lg font-medium hover:text-primary">
+                      {link.icon && <link.icon className="h-5 w-5" />}
                       {link.label}
                     </Link>
                   ))}
