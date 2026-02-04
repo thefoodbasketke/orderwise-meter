@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
+import { useSoundEffects } from "@/hooks/useSoundEffects";
 
 type Message = {
   role: "user" | "assistant";
@@ -12,6 +13,14 @@ type Message = {
 };
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-chat`;
+
+// Quick reply suggestions
+const QUICK_REPLIES = [
+  { label: "How to buy tokens?", message: "How do I purchase tokens for my meter?" },
+  { label: "Meter prices", message: "What are the prices for your prepaid meters?" },
+  { label: "Contact support", message: "How can I contact customer support?" },
+  { label: "Track my order", message: "How can I track my order status?" },
+];
 
 // Typing indicator component with animated dots
 const TypingIndicator = () => (
@@ -33,6 +42,30 @@ const TypingIndicator = () => (
       />
     ))}
   </div>
+);
+
+// Quick reply button component
+const QuickReplyButton = ({ 
+  label, 
+  onClick,
+  delay 
+}: { 
+  label: string; 
+  onClick: () => void;
+  delay: number;
+}) => (
+  <motion.button
+    initial={{ opacity: 0, y: 10, scale: 0.9 }}
+    animate={{ opacity: 1, y: 0, scale: 1 }}
+    exit={{ opacity: 0, scale: 0.9 }}
+    transition={{ delay, type: "spring", stiffness: 300, damping: 25 }}
+    whileHover={{ scale: 1.05, y: -2 }}
+    whileTap={{ scale: 0.95 }}
+    onClick={onClick}
+    className="px-3 py-1.5 text-xs font-medium bg-primary/10 hover:bg-primary/20 text-primary rounded-full border border-primary/20 transition-colors"
+  >
+    {label}
+  </motion.button>
 );
 
 // Message bubble component with animations
@@ -190,8 +223,10 @@ export const AIChatbot = () => {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
+  const [showQuickReplies, setShowQuickReplies] = useState(true);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const { playSendSound, playReceiveSound, playClickSound, triggerHaptic } = useSoundEffects();
 
   useEffect(() => {
     if (scrollAreaRef.current) {
@@ -225,6 +260,7 @@ export const AIChatbot = () => {
     if (!resp.body) throw new Error("No response body");
 
     setIsTyping(false);
+    playReceiveSound(); // Play sound when response starts
     
     const reader = resp.body.getReader();
     const decoder = new TextDecoder();
@@ -272,14 +308,20 @@ export const AIChatbot = () => {
     }
   };
 
-  const handleSend = async () => {
-    if (!input.trim() || isLoading) return;
+  const handleSend = async (messageText?: string) => {
+    const textToSend = messageText || input.trim();
+    if (!textToSend || isLoading) return;
 
-    const userMessage: Message = { role: "user", content: input.trim() };
+    // Play sound and haptic feedback
+    playSendSound();
+    triggerHaptic(15);
+
+    const userMessage: Message = { role: "user", content: textToSend };
     const newMessages = [...messages, userMessage];
     setMessages(newMessages);
     setInput("");
     setIsLoading(true);
+    setShowQuickReplies(false);
 
     try {
       await streamChat(newMessages);
@@ -291,6 +333,12 @@ export const AIChatbot = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleQuickReply = (message: string) => {
+    playClickSound();
+    triggerHaptic(10);
+    handleSend(message);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -339,7 +387,10 @@ export const AIChatbot = () => {
               whileTap={{ scale: 0.95 }}
             >
               <Button
-                onClick={() => setIsOpen(true)}
+                onClick={() => {
+                  playClickSound();
+                  setIsOpen(true);
+                }}
                 className="h-14 w-14 rounded-full bg-primary hover:bg-primary/90 shadow-lg relative"
               >
                 <MessageCircle className="h-6 w-6" />
@@ -392,7 +443,10 @@ export const AIChatbot = () => {
                 <Button
                   variant="ghost"
                   size="icon"
-                  onClick={() => setIsOpen(false)}
+                  onClick={() => {
+                    playClickSound();
+                    setIsOpen(false);
+                  }}
                   className="h-8 w-8 text-primary-foreground hover:bg-primary-foreground/20"
                 >
                   <X className="h-4 w-4" />
@@ -412,6 +466,27 @@ export const AIChatbot = () => {
                       isLatest={index === messages.length - 1 && message.role === "assistant"}
                     />
                   ))}
+                </AnimatePresence>
+                
+                {/* Quick reply suggestions */}
+                <AnimatePresence>
+                  {showQuickReplies && messages.length === 1 && !isLoading && (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      className="flex flex-wrap gap-2 mt-4"
+                    >
+                      {QUICK_REPLIES.map((reply, index) => (
+                        <QuickReplyButton
+                          key={reply.label}
+                          label={reply.label}
+                          onClick={() => handleQuickReply(reply.message)}
+                          delay={index * 0.1}
+                        />
+                      ))}
+                    </motion.div>
+                  )}
                 </AnimatePresence>
                 
                 {/* Typing indicator */}
@@ -478,7 +553,7 @@ export const AIChatbot = () => {
                   />
                 </motion.div>
                 <SendButton 
-                  onClick={handleSend} 
+                  onClick={() => handleSend()} 
                   disabled={!input.trim() || isLoading} 
                 />
               </div>

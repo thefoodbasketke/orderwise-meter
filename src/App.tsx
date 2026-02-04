@@ -46,6 +46,7 @@ import AdminKnowledgeBase from "./pages/admin/KnowledgeBase";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { WhatsAppFloat } from "./components/WhatsAppFloat";
 import { AIChatbot } from "./components/AIChatbot";
+import { ScrollToTop } from "./components/ScrollToTop";
 
 const queryClient = new QueryClient();
 
@@ -56,6 +57,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
+          <ScrollToTop />
           <AnimatePresence mode="wait">
             <Routes>
               {/* Public Routes */}
