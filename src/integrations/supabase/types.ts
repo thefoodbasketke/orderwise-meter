@@ -728,6 +728,7 @@ export type Database = {
           id: string
           image_url: string | null
           is_active: boolean | null
+          pdf_url: string | null
           section_key: string
           sort_order: number | null
           title: string | null
@@ -739,6 +740,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           is_active?: boolean | null
+          pdf_url?: string | null
           section_key: string
           sort_order?: number | null
           title?: string | null
@@ -750,6 +752,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           is_active?: boolean | null
+          pdf_url?: string | null
           section_key?: string
           sort_order?: number | null
           title?: string | null
