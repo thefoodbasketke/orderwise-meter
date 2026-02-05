@@ -2,8 +2,10 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Navbar } from "@/components/Navbar";
 import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Footer } from "@/components/Footer";
 import { motion } from "framer-motion";
+import { PageTransition } from "@/components/PageTransition";
 import { FadeIn, SlideIn, SectionHeading, StaggerContainer, StaggerItem, GridItem } from "@/components/AnimatedPage";
 import { 
   Target, 
@@ -12,7 +14,9 @@ import {
   Award, 
   Users, 
   CheckCircle2,
-  Building2
+  Building2,
+  FileText,
+  Download
 } from "lucide-react";
 
 interface SiteContent {
@@ -21,6 +25,7 @@ interface SiteContent {
   title: string | null;
   content: string | null;
   image_url: string | null;
+  pdf_url?: string | null;
 }
 
 const values = [
@@ -91,177 +96,206 @@ export default function About() {
   );
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
-      
-      {/* Hero Section */}
-      <motion.section 
-        className="bg-gradient-hero py-16 md:py-24"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.5 }}
-      >
-        <div className="container mx-auto px-4 text-center">
-          <motion.h1 
-            className="text-4xl md:text-5xl font-bold text-primary-foreground mb-4"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-          >
-            {aboutIntro.title}
-          </motion.h1>
-          <motion.p 
-            className="text-xl text-primary-foreground/80 max-w-2xl mx-auto"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-          >
-            Kenya's trusted partner in utility metering solutions since establishment
-          </motion.p>
-        </div>
-      </motion.section>
-
-      {/* Company Background */}
-      <section className="py-16">
-        <div className="container mx-auto px-4">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <SlideIn direction="left">
-              <h2 className="text-3xl font-bold mb-6">Our Story</h2>
-              <p className="text-muted-foreground mb-4">
-                {aboutIntro.content}
-              </p>
-              <p className="text-muted-foreground mb-4">
-                Our journey began with a simple mission: to make utility management more efficient and 
-                accessible for both landlords and tenants. Today, we have grown to become one of the 
-                most trusted names in the metering industry.
-              </p>
-              <p className="text-muted-foreground">
-                We work directly with manufacturers to ensure our products meet the highest quality 
-                standards while remaining affordable for our customers.
-              </p>
-            </SlideIn>
-            <SlideIn direction="right">
-              <div className="bg-muted/30 rounded-2xl p-8">
-                <div className="flex items-center gap-4 mb-6">
-                  <motion.div
-                    whileHover={{ rotate: 360 }}
-                    transition={{ duration: 0.5 }}
-                  >
-                    <Building2 className="h-12 w-12 text-primary" />
-                  </motion.div>
-                  <div>
-                    <h3 className="font-semibold text-lg">Our Location</h3>
-                    <p className="text-muted-foreground">Capital One Plaza, Eastern Bypass Off Thika Road</p>
-                  </div>
-                </div>
-                <StaggerContainer>
-                  <div className="space-y-3">
-                    {certifications.map((cert, index) => (
-                      <StaggerItem key={index}>
-                        <div className="flex items-center gap-2 text-sm">
-                          <CheckCircle2 className="h-4 w-4 text-primary" />
-                          <span>{cert}</span>
-                        </div>
-                      </StaggerItem>
-                    ))}
-                  </div>
-                </StaggerContainer>
-              </div>
-            </SlideIn>
+    <PageTransition>
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        
+        {/* Hero Section */}
+        <motion.section 
+          className="bg-gradient-hero py-16 md:py-24"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5 }}
+        >
+          <div className="container mx-auto px-4 text-center">
+            <motion.h1 
+              className="text-4xl md:text-5xl font-bold text-primary-foreground mb-4"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+            >
+              {aboutIntro.title}
+            </motion.h1>
+            <motion.p 
+              className="text-xl text-primary-foreground/80 max-w-2xl mx-auto"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+            >
+              Kenya's trusted partner in utility metering solutions since establishment
+            </motion.p>
           </div>
-        </div>
-      </section>
+        </motion.section>
 
-      {/* Customer Service Charter */}
-      {content.customer_charter && (
-        <section className="py-16 bg-primary/5">
+        {/* Company Background */}
+        <section className="py-16">
           <div className="container mx-auto px-4">
-            <div className="max-w-4xl mx-auto text-center">
-              <h2 className="text-3xl font-bold mb-6">{charter.title}</h2>
-              <p className="text-muted-foreground text-lg whitespace-pre-wrap">
-                {charter.content}
-              </p>
+            <div className="grid lg:grid-cols-2 gap-12 items-center">
+              <SlideIn direction="left">
+                <h2 className="text-3xl font-bold mb-6">Our Story</h2>
+                <p className="text-muted-foreground mb-4">
+                  {aboutIntro.content}
+                </p>
+                <p className="text-muted-foreground mb-4">
+                  Our journey began with a simple mission: to make utility management more efficient and 
+                  accessible for both landlords and tenants. Today, we have grown to become one of the 
+                  most trusted names in the metering industry.
+                </p>
+                <p className="text-muted-foreground">
+                  We work directly with manufacturers to ensure our products meet the highest quality 
+                  standards while remaining affordable for our customers.
+                </p>
+              </SlideIn>
+              <SlideIn direction="right">
+                <div className="bg-muted/30 rounded-2xl p-8">
+                  <div className="flex items-center gap-4 mb-6">
+                    <motion.div
+                      whileHover={{ rotate: 360 }}
+                      transition={{ duration: 0.5 }}
+                    >
+                      <Building2 className="h-12 w-12 text-primary" />
+                    </motion.div>
+                    <div>
+                      <h3 className="font-semibold text-lg">Our Location</h3>
+                      <p className="text-muted-foreground">Capital One Plaza, Eastern Bypass Off Thika Road</p>
+                    </div>
+                  </div>
+                  <StaggerContainer>
+                    <div className="space-y-3">
+                      {certifications.map((cert, index) => (
+                        <StaggerItem key={index}>
+                          <div className="flex items-center gap-2 text-sm">
+                            <CheckCircle2 className="h-4 w-4 text-primary" />
+                            <span>{cert}</span>
+                          </div>
+                        </StaggerItem>
+                      ))}
+                    </div>
+                  </StaggerContainer>
+                </div>
+              </SlideIn>
             </div>
           </div>
         </section>
-      )}
 
-      {/* Mission & Vision */}
-      <section className="py-16 bg-muted/30">
-        <div className="container mx-auto px-4">
-          <div className="grid md:grid-cols-2 gap-8">
-            <GridItem index={0}>
-              <Card className="border-2 border-primary/20 h-full">
-                <CardContent className="p-8">
-                  <motion.div 
-                    className="h-14 w-14 rounded-xl bg-primary/10 flex items-center justify-center mb-6"
-                    whileHover={{ scale: 1.1, rotate: 5 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <Target className="h-7 w-7 text-primary" />
-                  </motion.div>
-                  <h3 className="text-2xl font-bold mb-4">{mission.title}</h3>
-                  <p className="text-muted-foreground">
-                    {mission.content}
+        {/* Customer Service Charter */}
+        {content.customer_charter && (
+          <section className="py-16 bg-primary/5">
+            <div className="container mx-auto px-4">
+              <div className="max-w-4xl mx-auto text-center">
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5 }}
+                >
+                  <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-primary/10 mb-6">
+                    <FileText className="h-8 w-8 text-primary" />
+                  </div>
+                  <h2 className="text-3xl font-bold mb-6">{charter.title}</h2>
+                  <p className="text-muted-foreground text-lg whitespace-pre-wrap mb-8">
+                    {charter.content}
                   </p>
-                </CardContent>
-              </Card>
-            </GridItem>
-            
-            <GridItem index={1}>
-              <Card className="border-2 border-accent/20 h-full">
-                <CardContent className="p-8">
-                  <motion.div 
-                    className="h-14 w-14 rounded-xl bg-accent/10 flex items-center justify-center mb-6"
-                    whileHover={{ scale: 1.1, rotate: 5 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <Eye className="h-7 w-7 text-accent" />
-                  </motion.div>
-                  <h3 className="text-2xl font-bold mb-4">{vision.title}</h3>
-                  <p className="text-muted-foreground">
-                    {vision.content}
-                  </p>
-                </CardContent>
-              </Card>
-            </GridItem>
-          </div>
-        </div>
-      </section>
-
-      {/* Core Values */}
-      <section className="py-16">
-        <div className="container mx-auto px-4">
-          <SectionHeading className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-4">Our Core Values</h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              These values guide everything we do at UMS Kenya
-            </p>
-          </SectionHeading>
-          
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {values.map((value, index) => (
-              <GridItem key={index} index={index}>
-                <Card className="text-center hover:shadow-hover transition-shadow h-full">
-                  <CardContent className="p-6">
-                    <motion.div 
-                      className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4"
-                      whileHover={{ scale: 1.1, rotate: 360 }}
-                      transition={{ duration: 0.5 }}
+                  {content.customer_charter?.pdf_url && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ delay: 0.2 }}
                     >
-                      <value.icon className="h-6 w-6 text-primary" />
+                      <Button
+                        size="lg"
+                        onClick={() => window.open(content.customer_charter?.pdf_url!, "_blank")}
+                        className="gap-2"
+                      >
+                        <Download className="h-5 w-5" />
+                        Download Customer Service Charter
+                      </Button>
                     </motion.div>
-                    <h3 className="font-semibold mb-2">{value.title}</h3>
-                    <p className="text-sm text-muted-foreground">{value.description}</p>
+                  )}
+                </motion.div>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* Mission & Vision */}
+        <section className="py-16 bg-muted/30">
+          <div className="container mx-auto px-4">
+            <div className="grid md:grid-cols-2 gap-8">
+              <GridItem index={0}>
+                <Card className="border-2 border-primary/20 h-full">
+                  <CardContent className="p-8">
+                    <motion.div 
+                      className="h-14 w-14 rounded-xl bg-primary/10 flex items-center justify-center mb-6"
+                      whileHover={{ scale: 1.1, rotate: 5 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <Target className="h-7 w-7 text-primary" />
+                    </motion.div>
+                    <h3 className="text-2xl font-bold mb-4">{mission.title}</h3>
+                    <p className="text-muted-foreground">
+                      {mission.content}
+                    </p>
                   </CardContent>
                 </Card>
               </GridItem>
-            ))}
+              
+              <GridItem index={1}>
+                <Card className="border-2 border-accent/20 h-full">
+                  <CardContent className="p-8">
+                    <motion.div 
+                      className="h-14 w-14 rounded-xl bg-accent/10 flex items-center justify-center mb-6"
+                      whileHover={{ scale: 1.1, rotate: 5 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <Eye className="h-7 w-7 text-accent" />
+                    </motion.div>
+                    <h3 className="text-2xl font-bold mb-4">{vision.title}</h3>
+                    <p className="text-muted-foreground">
+                      {vision.content}
+                    </p>
+                  </CardContent>
+                </Card>
+              </GridItem>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      <Footer />
-    </div>
+        {/* Core Values */}
+        <section className="py-16">
+          <div className="container mx-auto px-4">
+            <SectionHeading className="text-center mb-12">
+              <h2 className="text-3xl font-bold mb-4">Our Core Values</h2>
+              <p className="text-muted-foreground max-w-2xl mx-auto">
+                These values guide everything we do at UMS Kenya
+              </p>
+            </SectionHeading>
+            
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {values.map((value, index) => (
+                <GridItem key={index} index={index}>
+                  <Card className="text-center hover:shadow-hover transition-shadow h-full">
+                    <CardContent className="p-6">
+                      <motion.div 
+                        className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4"
+                        whileHover={{ scale: 1.1, rotate: 360 }}
+                        transition={{ duration: 0.5 }}
+                      >
+                        <value.icon className="h-6 w-6 text-primary" />
+                      </motion.div>
+                      <h3 className="font-semibold mb-2">{value.title}</h3>
+                      <p className="text-sm text-muted-foreground">{value.description}</p>
+                    </CardContent>
+                  </Card>
+                </GridItem>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <Footer />
+      </div>
+    </PageTransition>
   );
 }

@@ -15,6 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import { Plus, Edit, Trash2, ArrowLeft, FileText, Briefcase, Star, FolderOpen, Settings, Image, Eye, EyeOff } from "lucide-react";
 import { Link } from "react-router-dom";
 import HeroBannerManager from "@/components/admin/HeroBannerManager";
+import { CharterPdfUpload } from "@/components/admin/CharterPdfUpload";
 
 // Types
 interface SiteContent {
@@ -23,6 +24,7 @@ interface SiteContent {
   title: string | null;
   content: string | null;
   image_url: string | null;
+  pdf_url: string | null;
   is_active: boolean;
   sort_order: number;
 }
@@ -144,6 +146,7 @@ export default function ContentManagement() {
       title: formData.get("title") as string,
       content: formData.get("content") as string,
       image_url: formData.get("image_url") as string || null,
+      pdf_url: editingContent?.pdf_url || null,
       is_active: editingContent?.is_active ?? true,
     };
 
@@ -394,6 +397,16 @@ export default function ContentManagement() {
                         <Label>Image URL</Label>
                         <Input name="image_url" defaultValue={editingContent?.image_url || ""} />
                       </div>
+                      {editingContent?.section_key === "customer_charter" && (
+                        <CharterPdfUpload
+                          currentPdfUrl={editingContent?.pdf_url || null}
+                          onPdfChange={(url) => {
+                            if (editingContent) {
+                              setEditingContent({ ...editingContent, pdf_url: url });
+                            }
+                          }}
+                        />
+                      )}
                       <Button type="submit" className="w-full">Save</Button>
                     </form>
                   </DialogContent>
