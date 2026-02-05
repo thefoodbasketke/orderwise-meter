@@ -126,9 +126,9 @@ const meterCategories = [
 ];
 
 const services = [
-  { icon: Wrench, title: "Installation", description: "Professional meter installation by certified technicians" },
-  { icon: HeadphonesIcon, title: "24/7 Support", description: "Round-the-clock technical assistance" },
-  { icon: Shield, title: "Warranty", description: "Comprehensive warranty on all products" },
+  { icon: Wrench, title: "Submetering Services", description: "Complete submetering solutions for properties and estates" },
+  { icon: HeadphonesIcon, title: "Smart Metering Solutions", description: "Intelligent metering systems with real-time monitoring" },
+  { icon: Shield, title: "Secure Bill Collection", description: "Reliable and secure utility bill collection services" },
 ];
 
 const testimonials = [
@@ -823,10 +823,10 @@ export default function Index() {
                 </Card>
                 <Card className="p-6 text-center shadow-card hover:shadow-hover transition-shadow">
                   <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-3">
-                    <Shield className="h-6 w-6 text-primary" />
+                    <HeadphonesIcon className="h-6 w-6 text-primary" />
                   </div>
-                  <h3 className="font-semibold mb-1">M-Pesa Payment</h3>
-                  <p className="text-xs text-muted-foreground">Secure STK Push payments</p>
+                  <h3 className="font-semibold mb-1">24hrs Customer Service</h3>
+                  <p className="text-xs text-muted-foreground">Round-the-clock support available</p>
                 </Card>
               </div>
               <div className="space-y-6 pt-8">
