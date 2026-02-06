@@ -1,9 +1,11 @@
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
+import { PageTransition } from "@/components/PageTransition";
 
 export default function PrivacyPolicy() {
   return (
-    <div className="min-h-screen bg-background">
+    <PageTransition>
+      <div className="min-h-screen bg-background">
       <Navbar />
       
       {/* Hero Section */}
@@ -118,5 +120,6 @@ export default function PrivacyPolicy() {
 
       <Footer />
     </div>
+  </PageTransition>
   );
 }

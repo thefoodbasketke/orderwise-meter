@@ -2,6 +2,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
+import { PageTransition } from "@/components/PageTransition";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -170,9 +171,10 @@ export default function Contact() {
   );
 
   return (
-    <div className="min-h-screen bg-background">
-      <SuccessOverlay />
-      <Navbar />
+    <PageTransition>
+      <div className="min-h-screen bg-background">
+        <SuccessOverlay />
+        <Navbar />
       
       {/* Hero Section */}
       <section className="bg-gradient-hero py-16 md:py-24 overflow-hidden">
@@ -388,7 +390,8 @@ export default function Contact() {
         </div>
       </section>
 
-      <Footer />
-    </div>
+        <Footer />
+      </div>
+    </PageTransition>
   );
 }

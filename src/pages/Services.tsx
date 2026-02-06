@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
+import { PageTransition } from "@/components/PageTransition";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { 
@@ -17,7 +18,9 @@ import {
   CheckCircle2,
   Zap,
   Droplets,
-  Flame
+  Flame,
+  Shield,
+  Cpu
 } from "lucide-react";
 import { FadeIn, SlideIn, StaggerContainer, GridItem, SectionHeading, CardHover } from "@/components/AnimatedPage";
 
@@ -33,24 +36,46 @@ interface Service {
 const defaultServices = [
   {
     icon: Wrench,
-    title: "Meter Installation",
-    description: "Professional installation of prepaid electricity, water, and gas meters by certified technicians.",
+    title: "Submetering Services",
+    description: "Complete submetering solutions for properties and estates. We handle everything from assessment to installation.",
     features: [
-      "Certified installation team",
-      "Same-day service available",
-      "Post-installation support",
-      "Warranty coverage"
+      "Property assessment & planning",
+      "Professional meter installation",
+      "System configuration & setup",
+      "Tenant onboarding support"
+    ]
+  },
+  {
+    icon: Cpu,
+    title: "Smart Metering Solutions",
+    description: "Intelligent metering systems with real-time monitoring and advanced analytics for efficient utility management.",
+    features: [
+      "Real-time consumption tracking",
+      "Mobile app integration",
+      "Automated alerts & notifications",
+      "Usage analytics dashboard"
+    ]
+  },
+  {
+    icon: Shield,
+    title: "Secure Bill Collection",
+    description: "Reliable and secure utility bill collection services with M-Pesa integration for seamless payments.",
+    features: [
+      "M-Pesa STK Push payments",
+      "Automated token delivery",
+      "Revenue reconciliation",
+      "Transparent reporting"
     ]
   },
   {
     icon: HeadphonesIcon,
-    title: "Technical Support",
-    description: "24/7 technical assistance for all your meter-related queries and issues.",
+    title: "24/7 Customer Support",
+    description: "Round-the-clock technical assistance for all your meter-related queries and issues.",
     features: [
-      "Round-the-clock support",
+      "24/7 helpline availability",
       "Remote troubleshooting",
-      "Expert guidance",
-      "Quick response time"
+      "Quick response time",
+      "Expert technical guidance"
     ]
   },
   {
@@ -74,22 +99,11 @@ const defaultServices = [
       "Cost optimization",
       "Compliance guidance"
     ]
-  },
-  {
-    icon: Gauge,
-    title: "Calibration Services",
-    description: "Precision calibration to ensure accurate readings and fair billing.",
-    features: [
-      "KEBS-certified calibration",
-      "Accuracy verification",
-      "Documentation provided",
-      "Regular recalibration"
-    ]
   }
 ];
 
 const iconMap: Record<string, any> = {
-  Wrench, HeadphonesIcon, Settings, ClipboardCheck, Gauge, Zap, Droplets, Flame
+  Wrench, HeadphonesIcon, Settings, ClipboardCheck, Gauge, Zap, Droplets, Flame, Shield, Cpu
 };
 
 const processSteps = [
@@ -128,8 +142,9 @@ export default function Services() {
     : defaultServices;
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
+    <PageTransition>
+      <div className="min-h-screen bg-background">
+        <Navbar />
       
       {/* Hero Section */}
       <section className="bg-gradient-hero py-16 md:py-24 overflow-hidden">
@@ -308,7 +323,8 @@ export default function Services() {
         </div>
       </section>
 
-      <Footer />
-    </div>
+        <Footer />
+      </div>
+    </PageTransition>
   );
 }
