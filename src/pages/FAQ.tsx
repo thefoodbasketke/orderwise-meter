@@ -1,5 +1,6 @@
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
+import { PageTransition } from "@/components/PageTransition";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -98,7 +99,8 @@ const generalFaqs = [
 
 export default function FAQ() {
   return (
-    <div className="min-h-screen bg-background">
+    <PageTransition>
+      <div className="min-h-screen bg-background">
       <Navbar />
       
       {/* Hero Section */}
@@ -216,7 +218,8 @@ export default function FAQ() {
         </div>
       </section>
 
-      <Footer />
-    </div>
+        <Footer />
+      </div>
+    </PageTransition>
   );
 }

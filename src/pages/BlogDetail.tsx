@@ -3,6 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
+import { PageTransition } from "@/components/PageTransition";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Calendar, User, Clock } from "lucide-react";
@@ -85,8 +86,9 @@ export default function BlogDetail() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
+    <PageTransition>
+      <div className="min-h-screen bg-background">
+        <Navbar />
 
       <article className="container mx-auto px-4 py-8 max-w-4xl">
         <Link to="/blog">
@@ -142,7 +144,8 @@ export default function BlogDetail() {
         />
       </article>
 
-      <Footer />
-    </div>
+        <Footer />
+      </div>
+    </PageTransition>
   );
 }

@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
+import { PageTransition } from "@/components/PageTransition";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -95,8 +96,9 @@ export default function Blog() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
+    <PageTransition>
+      <div className="min-h-screen bg-background">
+        <Navbar />
       
       {/* Hero Section */}
       <section className="bg-gradient-hero py-16 md:py-24 overflow-hidden">
@@ -257,7 +259,8 @@ export default function Blog() {
         </div>
       </section>
 
-      <Footer />
-    </div>
+        <Footer />
+      </div>
+    </PageTransition>
   );
 }
