@@ -335,33 +335,7 @@ export default function Index() {
                 {currentBanner?.description || "Premium prepaid electricity, water, and gas meters with flexible pricing, secure M-Pesa payments, and nationwide delivery."}
               </p>
               
-              {/* External Portal Buttons */}
-              <div className="flex flex-col sm:flex-row gap-4 mb-6">
-                <a 
-                  href="https://vendsolid.umskenya.com/tknverify" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                >
-                  <Button size="lg" variant="secondary" className="shadow-lg group w-full sm:w-auto">
-                    <Coins className="mr-2 h-5 w-5" />
-                    Retrieve Tokens
-                    <ExternalLink className="ml-2 h-4 w-4 opacity-70" />
-                  </Button>
-                </a>
-                <a 
-                  href="https://customer.umskenya.com/" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                >
-                  <Button size="lg" variant="outline" className="bg-white/10 text-primary-foreground border-white/20 hover:bg-white/20 w-full sm:w-auto">
-                    <Home className="mr-2 h-5 w-5" />
-                    Landlords Portal
-                    <ExternalLink className="ml-2 h-4 w-4 opacity-70" />
-                  </Button>
-                </a>
-              </div>
-              
-              {/* Secondary Actions */}
+              {/* Primary Actions */}
               <div className="flex flex-col sm:flex-row gap-4">
                 <Link to="/products">
                   <Button size="lg" variant="ghost" className="text-primary-foreground hover:bg-white/10 border border-white/20">
@@ -449,6 +423,60 @@ export default function Index() {
               ))}
             </div>
           </StaggerContainer>
+        </div>
+      </section>
+
+      {/* Quick Access Portals */}
+      <section className="py-12">
+        <div className="container mx-auto px-4">
+          <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+            <a 
+              href="https://vendsolid.umskenya.com/tknverify" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="group"
+            >
+              <Card className="h-full border-2 hover:border-primary/30 hover:shadow-hover transition-all duration-300 overflow-hidden">
+                <CardContent className="p-6 flex items-center gap-5">
+                  <div className="h-14 w-14 rounded-xl bg-primary/10 flex items-center justify-center shrink-0 group-hover:bg-primary/20 transition-colors">
+                    <Coins className="h-7 w-7 text-primary" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-lg mb-1 flex items-center gap-2">
+                      Retrieve Tokens
+                      <ExternalLink className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                    </h3>
+                    <p className="text-sm text-muted-foreground">
+                      Access your purchased prepaid tokens. Enter your meter number to retrieve your electricity, water, or gas tokens instantly.
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            </a>
+            <a 
+              href="https://customer.umskenya.com/" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="group"
+            >
+              <Card className="h-full border-2 hover:border-primary/30 hover:shadow-hover transition-all duration-300 overflow-hidden">
+                <CardContent className="p-6 flex items-center gap-5">
+                  <div className="h-14 w-14 rounded-xl bg-primary/10 flex items-center justify-center shrink-0 group-hover:bg-primary/20 transition-colors">
+                    <Home className="h-7 w-7 text-primary" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-lg mb-1 flex items-center gap-2">
+                      Landlords Portal
+                      <ExternalLink className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                    </h3>
+                    <p className="text-sm text-muted-foreground">
+                      Property management dashboard for landlords. Monitor tenant usage, manage meters, and track utility billing for your properties.
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            </a>
+          </div>
         </div>
       </section>
 
