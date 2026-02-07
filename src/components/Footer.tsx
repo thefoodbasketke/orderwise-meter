@@ -169,15 +169,27 @@ export function Footer() {
         </div>
         
         <motion.div 
-          className="border-t border-background/10 mt-10 pt-8 text-center text-sm text-background/50"
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ delay: 0.5 }}
-        >
-          <p>&copy; {new Date().getFullYear()} UMS Kenya. All rights reserved.</p>
-        </motion.div>
-      </motion.div>
+  className="border-t border-background/10 mt-10 pt-8 text-center text-sm text-background/50"
+  initial={{ opacity: 0 }}
+  whileInView={{ opacity: 1 }}
+  viewport={{ once: true }}
+  transition={{ delay: 0.5 }}
+>
+  <p>&copy; {new Date().getFullYear()} UMS Kenya. All rights reserved.</p>
+
+  <p className="mt-2 text-background/40 text-xs">
+    Designed &amp; Created by{" "}
+    <a
+      href="https://amstern.netlify.app/"
+      target="_blank"
+      rel="noopener noreferrer"
+      className="hover:text-background transition-colors"
+    >
+      Amstern Tech Hub
+    </a>
+  </p>
+</motion.div>
+        
     </footer>
   );
 }
