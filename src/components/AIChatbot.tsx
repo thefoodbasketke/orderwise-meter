@@ -348,8 +348,14 @@ export const AIChatbot = () => {
     }
   };
 
+  const constraintsRef = useRef<HTMLDivElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
+
   return (
     <>
+      {/* Invisible constraints container */}
+      <div ref={constraintsRef} className="fixed inset-0 pointer-events-none z-40" />
+
       {/* Chat Button with Label */}
       <AnimatePresence>
         {!isOpen && (
@@ -357,7 +363,14 @@ export const AIChatbot = () => {
             initial={{ scale: 0, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0, opacity: 0 }}
-            className="fixed bottom-24 right-6 z-50 flex flex-col items-end gap-2"
+            className="fixed bottom-24 right-6 z-50 flex flex-col items-end gap-2 cursor-grab active:cursor-grabbing"
+            drag
+            dragConstraints={constraintsRef}
+            dragElastic={0.1}
+            dragMomentum={false}
+            whileDrag={{ scale: 1.05 }}
+            onDragStart={() => setIsDragging(true)}
+            onDragEnd={() => setTimeout(() => setIsDragging(false), 100)}
           >
             {/* Floating label */}
             <motion.div
@@ -388,8 +401,10 @@ export const AIChatbot = () => {
             >
               <Button
                 onClick={() => {
-                  playClickSound();
-                  setIsOpen(true);
+                  if (!isDragging) {
+                    playClickSound();
+                    setIsOpen(true);
+                  }
                 }}
                 className="h-14 w-14 rounded-full bg-primary hover:bg-primary/90 shadow-lg relative"
               >
