@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Plus, Edit, Trash, Upload, ImageIcon, Eye, EyeOff, Star } from "lucide-react";
+import { Plus, Edit, Trash, Upload, ImageIcon, Eye, EyeOff, Star, Video } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 interface Blog {
@@ -20,6 +20,7 @@ interface Blog {
   excerpt: string | null;
   content: string;
   image_url: string | null;
+  video_url: string | null;
   author: string | null;
   category: string | null;
   tags: string[] | null;
@@ -146,12 +147,15 @@ export default function AdminBlogs() {
       const tagsString = formData.get("tags") as string;
       const tags = tagsString ? tagsString.split(",").map(t => t.trim()).filter(Boolean) : null;
 
+      const videoUrl = formData.get("video_url") as string || null;
+      
       const blogData = {
         title,
         slug: editingBlog?.slug || generateSlug(title),
         excerpt: formData.get("excerpt") as string || null,
         content: formData.get("content") as string,
         image_url: imageUrl,
+        video_url: videoUrl,
         author: formData.get("author") as string || null,
         category: formData.get("category") as string || null,
         tags,
@@ -317,6 +321,15 @@ export default function AdminBlogs() {
                         placeholder="e.g., Guide, News, Tips"
                       />
                     </div>
+                  </div>
+                  <div>
+                    <Label htmlFor="video_url">Video URL (YouTube/Vimeo)</Label>
+                    <Input
+                      id="video_url"
+                      name="video_url"
+                      defaultValue={editingBlog?.video_url || ""}
+                      placeholder="https://youtube.com/watch?v=..."
+                    />
                   </div>
                   <div>
                     <Label htmlFor="tags">Tags (comma-separated)</Label>

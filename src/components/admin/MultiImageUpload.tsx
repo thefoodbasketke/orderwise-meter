@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -22,6 +22,11 @@ export function MultiImageUpload({ productId, existingImages, onImagesChange }: 
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+
+  // Sync with existingImages when they change (e.g., when editing a product)
+  useEffect(() => {
+    setImages(existingImages);
+  }, [existingImages]);
 
   const handleFilesSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);

@@ -30,9 +30,10 @@ const contactSchema = z.object({
 });
 
 const contactInfo = [
-  { icon: Phone, label: "Phone", value: "0700 444 448", href: "tel:0700444448" },
-  { icon: Mail, label: "Email", value: "info@umskenya.com", href: "mailto:info@umskenya.com" },
-  { icon: MapPin, label: "Address", value: "Capital One Plaza, Eastern Bypass Off Thika Road", href: null },
+  { icon: Phone, label: "WhatsApp/Call/SMS", value: "0700 444 448", href: "tel:0700444448" },
+  { icon: Phone, label: "Calls Only", value: "0709 155 585", href: "tel:0709155585" },
+  { icon: Mail, label: "Email", value: "inquiries@umskenya.com", href: "mailto:inquiries@umskenya.com" },
+  { icon: MapPin, label: "Address", value: "Capital One Plaza, Eastern Bypass, Off Thika Road", href: null },
   { icon: Clock, label: "Hours", value: "Mon - Fri: 8:00 AM - 5:00 PM", href: null },
 ];
 
