@@ -146,7 +146,10 @@ export function Footer() {
                 transition={{ duration: 0.2 }}
               >
                 <Phone className="h-4 w-4" />
-                <a href="tel:0700444448" className="hover:text-background transition-colors">0700 444 448</a>
+                <div className="flex flex-col">
+                  <a href="tel:0700444448" className="hover:text-background transition-colors">0700 444 448 (WhatsApp/Call/SMS)</a>
+                  <a href="tel:0709155585" className="hover:text-background transition-colors">0709 155 585 (Calls Only)</a>
+                </div>
               </motion.li>
               <motion.li 
                 className="flex items-center gap-2"
@@ -154,7 +157,7 @@ export function Footer() {
                 transition={{ duration: 0.2 }}
               >
                 <Mail className="h-4 w-4" />
-                <a href="mailto:info@umskenya.com" className="hover:text-background transition-colors">info@umskenya.com</a>
+                <a href="mailto:inquiries@umskenya.com" className="hover:text-background transition-colors">inquiries@umskenya.com</a>
               </motion.li>
               <motion.li 
                 className="flex items-start gap-2"
@@ -162,7 +165,7 @@ export function Footer() {
                 transition={{ duration: 0.2 }}
               >
                 <MapPin className="h-4 w-4 mt-0.5" />
-                <span>Capital One Plaza, Eastern Bypass Off Thika Road</span>
+                <span>Capital One Plaza, Eastern Bypass, Off Thika Road</span>
               </motion.li>
             </ul>
           </motion.div>

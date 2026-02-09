@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
@@ -46,6 +46,7 @@ export default function Products() {
   const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
   const { toast } = useToast();
   const { settings: siteSettings } = useSiteSettings();
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchProducts();
@@ -120,6 +121,7 @@ export default function Products() {
         quickViewProduct={quickViewProduct}
         setQuickViewProduct={setQuickViewProduct}
         siteSettings={siteSettings}
+        navigate={navigate}
       />
     </CompareProvider>
   );
@@ -136,6 +138,7 @@ interface ProductsContentProps {
   quickViewProduct: Product | null;
   setQuickViewProduct: (product: Product | null) => void;
   siteSettings: { hide_pricing: boolean; hide_stock: boolean };
+  navigate: (path: string) => void;
 }
 
 function ProductsContent({
@@ -149,6 +152,7 @@ function ProductsContent({
   quickViewProduct,
   setQuickViewProduct,
   siteSettings,
+  navigate,
 }: ProductsContentProps) {
   if (loading) {
     return (
@@ -247,7 +251,10 @@ function ProductsContent({
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {filteredProducts.map((product, index) => (
               <GridItem key={product.id} index={index}>
-                <Card className="group hover:shadow-hover transition-all duration-300 h-full flex flex-col">
+                <Card 
+                  className="group hover:shadow-hover transition-all duration-300 h-full flex flex-col cursor-pointer"
+                  onClick={() => navigate(`/products/${product.id}`)}
+                >
                   <CardHeader className="p-0">
                     <div className="aspect-square bg-muted rounded-t-lg overflow-hidden relative">
                       {product.image_url ? (
@@ -286,14 +293,20 @@ function ProductsContent({
                         <Button
                           size="sm"
                           variant="secondary"
-                          onClick={() => setQuickViewProduct(product)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setQuickViewProduct(product);
+                          }}
                           className="opacity-0 group-hover:opacity-100 transition-opacity"
                         >
                           <Eye className="h-4 w-4 mr-1" />
                           Quick View
                         </Button>
                       </motion.div>
-                      <div className="absolute bottom-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div 
+                        className="absolute bottom-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                        onClick={(e) => e.stopPropagation()}
+                      >
                         <CompareButton product={product} />
                       </div>
                     </div>
@@ -321,7 +334,7 @@ function ProductsContent({
                       </Badge>
                     )}
                   </CardContent>
-                  <CardFooter className="p-4 pt-0 flex flex-col gap-2">
+                  <CardFooter className="p-4 pt-0 flex flex-col gap-2" onClick={(e) => e.stopPropagation()}>
                     <Link to={`/products/${product.id}`} className="w-full">
                       <Button className="w-full" disabled={!siteSettings.hide_stock && product.stock === 0}>
                         View Details
@@ -333,6 +346,7 @@ function ProductsContent({
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex-1"
+                        onClick={(e) => e.stopPropagation()}
                       >
                         <Button variant="default" className="w-full bg-green-600 hover:bg-green-700">
                           <MessageCircle className="h-4 w-4 mr-1" />
@@ -344,6 +358,7 @@ function ProductsContent({
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex-1"
+                        onClick={(e) => e.stopPropagation()}
                       >
                         <Button variant="outline" className="w-full">
                           <MessageCircle className="h-4 w-4 mr-1" />
