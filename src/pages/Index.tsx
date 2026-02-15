@@ -846,8 +846,8 @@ export default function Index() {
                   <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-3">
                     <ShoppingBag className="h-6 w-6 text-primary" />
                   </div>
-                  <h3 className="font-semibold mb-1">Easy Ordering</h3>
-                  <p className="text-xs text-muted-foreground">Simple online ordering process</p>
+                  <h3 className="font-semibold mb-1">Affordable Pricing</h3>
+                  <p className="text-xs text-muted-foreground">Get the best deals</p>
                 </Card>
                 <Card className="p-6 text-center shadow-card hover:shadow-hover transition-shadow">
                   <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-3">
@@ -862,8 +862,8 @@ export default function Index() {
                   <div className="h-12 w-12 rounded-full bg-accent/10 flex items-center justify-center mx-auto mb-3">
                     <MessageSquare className="h-6 w-6 text-accent" />
                   </div>
-                  <h3 className="font-semibold mb-1">Price Negotiation</h3>
-                  <p className="text-xs text-muted-foreground">Get the best deals</p>
+                  <h3 className="font-semibold mb-1">Fast Customer Response</h3>
+                  <p className="text-xs text-muted-foreground">Get timely feedback on each step</p>
                 </Card>
                 <Card className="p-6 text-center shadow-card hover:shadow-hover transition-shadow">
                   <div className="h-12 w-12 rounded-full bg-accent/10 flex items-center justify-center mx-auto mb-3">
