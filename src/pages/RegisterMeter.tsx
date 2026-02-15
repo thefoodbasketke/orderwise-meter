@@ -372,18 +372,7 @@ export default function RegisterMeter() {
                         <p className="text-sm text-muted-foreground">
                           Your standard 2-year warranty will be automatically activated upon registration.
                         </p>
-                        <div className="flex items-center space-x-2">
-                          <Checkbox
-                            id="extendedWarranty"
-                            checked={formData.extendedWarranty}
-                            onCheckedChange={(checked) => 
-                              setFormData({ ...formData, extendedWarranty: checked as boolean })
-                            }
-                          />
-                          <Label htmlFor="extendedWarranty" className="text-sm cursor-pointer">
-                            I'm interested in extended warranty options (our team will contact you)
-                          </Label>
-                        </div>
+                        
                       </div>
 
                       {/* Terms and Conditions */}
