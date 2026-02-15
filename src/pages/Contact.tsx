@@ -246,24 +246,25 @@ export default function Contact() {
                 </StaggerContainer>
                 
                 {/* Map */}
-                <FadeIn delay={0.5}>
-                  <motion.div 
-                    className="mt-8 rounded-xl overflow-hidden border"
-                    whileHover={{ scale: 1.02 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <iframe
-                      src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3988.8176!2d36.9!3d-1.2!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMcKwMTInMDAuMCJTIDM2wrA1NCcwMC4wIkU!5e0!3m2!1sen!2ske!4v1234567890"
-                      width="100%"
-                      height="250"
-                      style={{ border: 0 }}
-                      allowFullScreen
-                      loading="lazy"
-                      referrerPolicy="no-referrer-when-downgrade"
-                      title="UMS Kenya Location"
-                    ></iframe>
-                  </motion.div>
-                </FadeIn>
+<FadeIn delay={0.5}>
+  <motion.div 
+    className="mt-8 rounded-xl overflow-hidden border"
+    whileHover={{ scale: 1.02 }}
+    transition={{ duration: 0.3 }}
+  >
+    <iframe
+      src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3988.8176!2d36.9!3d-1.2!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMcKwMTInMDAuMCJTIDM2wrA1NCcwMC4wIkU!5e0!3m2!1sen!2ske!4v1234567890"
+      width="100%"
+      height="250"
+      style={{ border: 0 }}
+      allowFullScreen
+      loading="lazy"
+      referrerPolicy="no-referrer-when-downgrade"
+      title="UMS Kenya Location"
+    ></iframe>
+  </motion.div>
+</FadeIn>
+
               </div>
             </SlideIn>
 
