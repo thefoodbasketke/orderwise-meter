@@ -35,7 +35,7 @@ const landlordFaqs = [
   },
   {
     question: "Who installs the meter once purchased?",
-    answer: "UMS provides professional installation services through our certified technicians. Installation is typically done within 24-48 hours of purchase. You can also use approved third-party installers if preferred."
+    answer: "UMS does not provides installation services. We recommend using a technician of your choice. You can also use approved third-party installers if preferred."
   },
   {
     question: "Who is responsible for the main utility meter?",
@@ -51,7 +51,7 @@ const landlordFaqs = [
   },
   {
     question: "Can landlord increase the tariff?",
-    answer: "Yes, landlords have the flexibility to set their own tariff rates through the management portal. However, rates should be reasonable and compliant with any applicable regulations."
+    answer: "Yes(Only applies for water meters and solar power), landlords have the flexibility to set their own tariff rates through the management portal. However, rates should be reasonable and compliant with any applicable regulations. NO(For electricity meters) We use the rates set by Epra and KPLC"
   }
 ];
 
@@ -85,7 +85,7 @@ const generalFaqs = [
   },
   {
     question: "What is your warranty policy?",
-    answer: "All UMS meters come with a minimum 1-year manufacturer's warranty covering defects and malfunctions. Extended warranty options are available for purchase."
+    answer: "All UMS meters come with a minimum 1-year manufacturer's warranty covering defects and malfunctions."
   },
   {
     question: "Can I negotiate prices for bulk orders?",
