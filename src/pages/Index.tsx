@@ -98,8 +98,8 @@ interface VideoShowcase {
 }
 
 const stats = [
-  { value: "10K+", label: "Meters Installed", icon: Zap },
-  { value: "500+", label: "Happy Clients", icon: Users },
+  { value: "30K+", label: "Meters Installed", icon: Zap },
+  { value: "8000+", label: "Happy Clients", icon: Users },
   { value: "47", label: "Counties Served", icon: Building2 },
   { value: "99%", label: "Satisfaction Rate", icon: Award },
 ];
