@@ -248,7 +248,7 @@ export default function AdminDashboard() {
                       <CardContent className="space-y-4">
                         <div>
                           <div className="text-sm text-muted-foreground">Platform</div>
-                          <div className="font-semibold">UMS Meter Ordering System</div>
+                          <div className="font-semibold">UMS Prepaid</div>
                         </div>
                         <div>
                           <div className="text-sm text-muted-foreground">Status</div>
