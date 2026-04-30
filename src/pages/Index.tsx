@@ -48,6 +48,7 @@ import {
   ZoomIn
 } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { TaskActionGrid } from "@/components/TaskActionGrid";
 import umsLogo from "@/assets/ums-logo.png";
 
 interface HeroBanner {
@@ -192,14 +193,25 @@ export default function Index() {
     };
 
     const fetchFeaturedBlogs = async () => {
-      const { data } = await supabase
+      // Try featured first, then fall back to latest published
+      const { data: featured } = await supabase
         .from("blogs")
         .select("id, title, slug, excerpt, image_url, author, category, published_at")
         .eq("is_published", true)
         .eq("is_featured", true)
         .order("published_at", { ascending: false })
         .limit(3);
-      if (data) setFeaturedBlogs(data);
+      if (featured && featured.length > 0) {
+        setFeaturedBlogs(featured);
+        return;
+      }
+      const { data: latest } = await supabase
+        .from("blogs")
+        .select("id, title, slug, excerpt, image_url, author, category, published_at")
+        .eq("is_published", true)
+        .order("published_at", { ascending: false })
+        .limit(3);
+      if (latest) setFeaturedBlogs(latest);
     };
 
     const fetchGalleryImages = async () => {
