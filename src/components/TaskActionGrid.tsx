@@ -1,9 +1,39 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
-import { Coins, Home, FileText, Shield, AlertTriangle, ArrowRight } from "lucide-react";
+import {
+  Coins,
+  Home,
+  FileText,
+  Shield,
+  AlertTriangle,
+  ArrowRight,
+  ShoppingCart,
+} from "lucide-react";
 
-const actions = [
+interface Action {
+  title: string;
+  description: string;
+  icon: typeof Coins;
+  href: string;
+  external?: boolean;
+  color: string;
+  iconColor: string;
+  featured?: boolean;
+  cta?: string;
+}
+
+const actions: Action[] = [
+  {
+    title: "Order a Meter",
+    description: "Browse our meters and place an order with secure M-Pesa checkout.",
+    icon: ShoppingCart,
+    href: "/products",
+    color: "from-primary to-primary/80",
+    iconColor: "text-primary",
+    featured: true,
+    cta: "Shop now",
+  },
   {
     title: "Retrieve Tokens",
     description: "Get your prepaid electricity, water or gas tokens instantly.",
