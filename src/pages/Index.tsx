@@ -48,6 +48,7 @@ import {
   ZoomIn
 } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { TaskActionGrid } from "@/components/TaskActionGrid";
 import umsLogo from "@/assets/ums-logo.png";
 
 interface HeroBanner {
@@ -192,14 +193,25 @@ export default function Index() {
     };
 
     const fetchFeaturedBlogs = async () => {
-      const { data } = await supabase
+      // Try featured first, then fall back to latest published
+      const { data: featured } = await supabase
         .from("blogs")
         .select("id, title, slug, excerpt, image_url, author, category, published_at")
         .eq("is_published", true)
         .eq("is_featured", true)
         .order("published_at", { ascending: false })
         .limit(3);
-      if (data) setFeaturedBlogs(data);
+      if (featured && featured.length > 0) {
+        setFeaturedBlogs(featured);
+        return;
+      }
+      const { data: latest } = await supabase
+        .from("blogs")
+        .select("id, title, slug, excerpt, image_url, author, category, published_at")
+        .eq("is_published", true)
+        .order("published_at", { ascending: false })
+        .limit(3);
+      if (latest) setFeaturedBlogs(latest);
     };
 
     const fetchGalleryImages = async () => {
@@ -397,6 +409,9 @@ export default function Index() {
         </div>
       </section>
 
+      {/* Task-oriented action grid (KPLC-style quick services) */}
+      <TaskActionGrid />
+
       {/* Stats Section */}
       <section className="py-12 bg-muted/30">
         <div className="container mx-auto px-4">
@@ -426,59 +441,7 @@ export default function Index() {
         </div>
       </section>
 
-      {/* Quick Access Portals */}
-      <section className="py-12">
-        <div className="container mx-auto px-4">
-          <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
-            <a 
-              href="https://vendsolid.umskenya.com/tknverify" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="group"
-            >
-              <Card className="h-full border-2 hover:border-primary/30 hover:shadow-hover transition-all duration-300 overflow-hidden">
-                <CardContent className="p-6 flex items-center gap-5">
-                  <div className="h-14 w-14 rounded-xl bg-primary/10 flex items-center justify-center shrink-0 group-hover:bg-primary/20 transition-colors">
-                    <Coins className="h-7 w-7 text-primary" />
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-lg mb-1 flex items-center gap-2">
-                      Retrieve Tokens
-                      <ExternalLink className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
-                    </h3>
-                    <p className="text-sm text-muted-foreground">
-                      Access your purchased prepaid tokens. Enter your meter number to retrieve your electricity, water, or gas tokens instantly.
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-            </a>
-            <a 
-              href="https://customer.umskenya.com/" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="group"
-            >
-              <Card className="h-full border-2 hover:border-primary/30 hover:shadow-hover transition-all duration-300 overflow-hidden">
-                <CardContent className="p-6 flex items-center gap-5">
-                  <div className="h-14 w-14 rounded-xl bg-primary/10 flex items-center justify-center shrink-0 group-hover:bg-primary/20 transition-colors">
-                    <Home className="h-7 w-7 text-primary" />
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-lg mb-1 flex items-center gap-2">
-                      Landlords Portal
-                      <ExternalLink className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
-                    </h3>
-                    <p className="text-sm text-muted-foreground">
-                      Property management dashboard for landlords. Monitor tenant usage, manage meters, and track utility billing for your properties.
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-            </a>
-          </div>
-        </div>
-      </section>
+      {/* Quick Access Portals are now part of the TaskActionGrid above */}
 
       {/* Product Categories */}
       <section className="py-20">

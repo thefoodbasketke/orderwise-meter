@@ -47,6 +47,7 @@ import { ProtectedRoute } from "./components/ProtectedRoute";
 import { WhatsAppFloat } from "./components/WhatsAppFloat";
 import { AIChatbot } from "./components/AIChatbot";
 import { ScrollToTop } from "./components/ScrollToTop";
+import { AccessibilityMenu } from "./components/AccessibilityMenu";
 
 const queryClient = new QueryClient();
 
@@ -105,6 +106,7 @@ const App = () => (
           </AnimatePresence>
           <WhatsAppFloat />
           <AIChatbot />
+          <AccessibilityMenu />
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>

@@ -235,3 +235,35 @@
 .animate-pulse-glow {
   animation: pulse-glow 2s ease-in-out infinite;
 }
+
+/* Accessibility: high contrast mode */
+.a11y-high-contrast {
+  --background: 0 0% 100%;
+  --foreground: 0 0% 0%;
+  --card: 0 0% 100%;
+  --card-foreground: 0 0% 0%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 0 0% 0%;
+  --primary: 220 100% 30%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 0 0% 90%;
+  --secondary-foreground: 0 0% 0%;
+  --muted: 0 0% 92%;
+  --muted-foreground: 0 0% 15%;
+  --accent: 220 100% 30%;
+  --accent-foreground: 0 0% 100%;
+  --border: 0 0% 0%;
+  --input: 0 0% 0%;
+  --ring: 0 0% 0%;
+}
+
+.a11y-high-contrast * {
+  text-shadow: none !important;
+}
+
+/* Mobile UX: ensure minimum touch target sizes */
+@media (max-width: 768px) {
+  button, a[role="button"], .touch-target {
+    min-height: 44px;
+  }
+}
