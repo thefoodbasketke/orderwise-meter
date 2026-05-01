@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Slider } from "@/components/ui/slider";
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -85,6 +86,7 @@ interface SiteSetting {
   id: string;
   setting_key: string;
   setting_value: boolean;
+  setting_value_text: string | null;
   description: string | null;
 }
 
@@ -306,6 +308,17 @@ export default function ContentManagement() {
     try {
       await supabase.from("site_settings").update({ setting_value: !currentValue }).eq("setting_key", settingKey);
       toast({ title: "Success", description: "Setting updated" });
+      fetchAllContent();
+    } catch (error: any) {
+      toast({ variant: "destructive", title: "Error", description: error.message });
+    }
+  };
+
+  // Update text/numeric setting (debounced via blur or explicit save)
+  const updateTextSetting = async (settingKey: string, value: string) => {
+    try {
+      await supabase.from("site_settings").update({ setting_value_text: value }).eq("setting_key", settingKey);
+      toast({ title: "Saved", description: "Setting updated" });
       fetchAllContent();
     } catch (error: any) {
       toast({ variant: "destructive", title: "Error", description: error.message });
@@ -812,7 +825,9 @@ export default function ContentManagement() {
                   Control what information is visible to customers on product pages.
                 </p>
                 
-                {siteSettings.map((setting) => (
+                {siteSettings
+                  .filter((s) => s.setting_key !== "hero_overlay_opacity")
+                  .map((setting) => (
                   <div key={setting.id} className="flex items-center justify-between p-4 border rounded-lg">
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
@@ -840,12 +855,40 @@ export default function ContentManagement() {
                     </div>
                   </div>
                 ))}
-                
+
+                {/* Hero Overlay Opacity */}
+                {(() => {
+                  const overlay = siteSettings.find((s) => s.setting_key === "hero_overlay_opacity");
+                  const current = parseFloat(overlay?.setting_value_text ?? "0.4");
+                  const value = isNaN(current) ? 0.4 : Math.min(1, Math.max(0, current));
+                  return (
+                    <div className="p-4 border rounded-lg space-y-3">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h4 className="font-medium">Hero Overlay Opacity</h4>
+                          <p className="text-sm text-muted-foreground mt-1">
+                            Adjust the blue overlay tint on hero images and videos. Lower = clearer media, higher = more readable text.
+                          </p>
+                        </div>
+                        <span className="text-sm font-mono text-primary">{Math.round(value * 100)}%</span>
+                      </div>
+                      <Slider
+                        defaultValue={[value]}
+                        min={0}
+                        max={1}
+                        step={0.05}
+                        onValueCommit={(v) => updateTextSetting("hero_overlay_opacity", String(v[0]))}
+                      />
+                    </div>
+                  );
+                })()}
+
                 <div className="bg-muted/50 p-4 rounded-lg">
                   <h4 className="font-medium mb-2">How it works</h4>
                   <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside">
                     <li><strong>Hide Pricing:</strong> Removes price displays from product cards, detail pages, and quick view modals</li>
                     <li><strong>Hide Stock:</strong> Removes stock quantity badges from all product displays</li>
+                    <li><strong>Hero Overlay Opacity:</strong> Controls the strength of the blue tint over hero banner media</li>
                   </ul>
                 </div>
               </CardContent>
