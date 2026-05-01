@@ -134,9 +134,7 @@ export function TaskActionGrid() {
               </Card>
             );
 
-            const spanClass = featured
-              ? "col-span-2 md:col-span-3 lg:col-span-2 lg:row-span-1"
-              : "lg:col-span-1";
+            const spanClass = "col-span-1";
 
             return (
               <motion.div
