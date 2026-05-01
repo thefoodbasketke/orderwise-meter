@@ -236,6 +236,16 @@ export default function AdminDashboard() {
                           </div>
                           <div className="text-sm text-muted-foreground">Manage chatbot knowledge and responses</div>
                         </Link>
+                        <Link
+                          to="/admin/forms"
+                          className="block p-3 rounded-lg hover:bg-muted transition-colors"
+                        >
+                          <div className="font-semibold flex items-center gap-2">
+                            <FileText className="h-4 w-4" />
+                            Forms &amp; Downloads
+                          </div>
+                          <div className="text-sm text-muted-foreground">Upload PDFs available on the public Forms page</div>
+                        </Link>
                       </CardContent>
                     </Card>
                   </FadeIn>

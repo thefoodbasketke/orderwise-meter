@@ -116,6 +116,7 @@ export function Footer() {
                 { href: "/testimonials", label: "Testimonials" },
                 { href: "/careers", label: "Careers" },
                 { href: "/register-meter", label: "Register Meter" },
+                { href: "/forms", label: "Downloads & Forms" },
                 { href: "/privacy", label: "Privacy Policy" },
                 { href: "/terms", label: "Terms & Conditions" },
               ].map((link, index) => (
