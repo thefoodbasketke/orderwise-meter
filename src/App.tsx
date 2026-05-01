@@ -27,6 +27,7 @@ import Terms from "./pages/Terms";
 import RegisterMeter from "./pages/RegisterMeter";
 import Projects from "./pages/Projects";
 import Quotation from "./pages/Quotation";
+import Forms from "./pages/Forms";
 
 // Admin Pages
 import AdminDashboard from "./pages/admin/Dashboard";
@@ -42,6 +43,7 @@ import AdminBlogs from "./pages/admin/Blogs";
 import AdminGallery from "./pages/admin/Gallery";
 import AdminVideoShowcase from "./pages/admin/VideoShowcase";
 import AdminKnowledgeBase from "./pages/admin/KnowledgeBase";
+import AdminForms from "./pages/admin/Forms";
 
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { WhatsAppFloat } from "./components/WhatsAppFloat";
@@ -77,6 +79,7 @@ const App = () => (
               <Route path="/register-meter" element={<RegisterMeter />} />
               <Route path="/projects" element={<Projects />} />
               <Route path="/quotation" element={<Quotation />} />
+              <Route path="/forms" element={<Forms />} />
               
               {/* Product Routes */}
               <Route path="/products" element={<Products />} />
@@ -100,6 +103,7 @@ const App = () => (
               <Route path="/admin/gallery" element={<ProtectedRoute requireAdmin><AdminGallery /></ProtectedRoute>} />
               <Route path="/admin/video-showcase" element={<ProtectedRoute requireAdmin><AdminVideoShowcase /></ProtectedRoute>} />
               <Route path="/admin/knowledge-base" element={<ProtectedRoute requireAdmin><AdminKnowledgeBase /></ProtectedRoute>} />
+              <Route path="/admin/forms" element={<ProtectedRoute requireAdmin><AdminForms /></ProtectedRoute>} />
               
               <Route path="*" element={<NotFound />} />
             </Routes>
