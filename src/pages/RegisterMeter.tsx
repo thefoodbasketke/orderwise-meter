@@ -22,7 +22,8 @@ import {
   Trash2,
   FileText,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  Download
 } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { z } from "zod";
@@ -410,39 +411,68 @@ export default function RegisterMeter() {
                         
                       </div>
 
-                      {/* Terms and Conditions */}
+                      {/* Customer Agreement */}
                       <div className="space-y-4 border-t pt-6">
-                        <div className="flex items-center gap-2 text-lg font-semibold">
-                          <FileText className="h-5 w-5 text-primary" />
-                          Terms and Conditions *
+                        <div className="flex items-center justify-between gap-3 flex-wrap">
+                          <div className="flex items-center gap-2 text-lg font-semibold">
+                            <FileText className="h-5 w-5 text-primary" />
+                            UMS Customer Agreement *
+                          </div>
+                          <Button asChild type="button" variant="outline" size="sm">
+                            <a
+                              href={CUSTOMER_AGREEMENT_PDF_URL}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              download
+                            >
+                              <Download className="h-4 w-4 mr-2" />
+                              Download PDF
+                            </a>
+                          </Button>
                         </div>
-                        
+
+                        <p className="text-sm text-muted-foreground">
+                          Please read the UMS Kenya Customer Agreement for Prepaid Metering Services below before continuing.
+                        </p>
+
                         <div className="border rounded-lg">
                           <button
                             type="button"
                             onClick={() => setShowTerms(!showTerms)}
                             className="w-full flex items-center justify-between p-4 text-left hover:bg-muted/50 transition-colors"
                           >
-                            <span className="font-medium">View Terms and Conditions</span>
+                            <span className="font-medium">View Customer Agreement</span>
                             {showTerms ? (
                               <ChevronUp className="h-5 w-5 text-muted-foreground" />
                             ) : (
                               <ChevronDown className="h-5 w-5 text-muted-foreground" />
                             )}
                           </button>
-                          
+
                           {showTerms && (
                             <div className="border-t">
-                              <ScrollArea className="h-64 p-4">
-                                <div className="space-y-4">
-                                  <p className="text-sm font-medium">
-                                    These terms and conditions ("Terms") outline the agreement between UMS and the property owner or occupant ("Customer") for the installation of submeters.
+                              <ScrollArea className="h-72 p-4">
+                                <div className="space-y-5">
+                                  <p className="text-sm font-semibold">
+                                    UMS Kenya Customer Agreement for Prepaid Metering Services
                                   </p>
-                                  <ol className="list-decimal pl-5 space-y-3 text-sm text-muted-foreground">
-                                    {termsAndConditions.map((term, index) => (
-                                      <li key={index}>{term}</li>
-                                    ))}
-                                  </ol>
+                                  {agreementSections.map((section, idx) => (
+                                    <div key={idx} className="space-y-1">
+                                      <p className="text-sm font-semibold">{section.heading}</p>
+                                      {Array.isArray(section.body) ? (
+                                        <ul className="list-disc pl-5 space-y-1 text-sm text-muted-foreground">
+                                          {section.body.map((line, i) => (
+                                            <li key={i}>{line}</li>
+                                          ))}
+                                        </ul>
+                                      ) : (
+                                        <p className="text-sm text-muted-foreground">{section.body}</p>
+                                      )}
+                                    </div>
+                                  ))}
+                                  <p className="text-xs text-muted-foreground pt-2 border-t">
+                                    UMS Kenya Ltd · Capital One Plaza, Eastern Bypass, Off Thika Road · 0700 444 448 / 0709 155 585 · inquiries@umskenya.com
+                                  </p>
                                 </div>
                               </ScrollArea>
                             </div>
@@ -453,13 +483,21 @@ export default function RegisterMeter() {
                           <Checkbox
                             id="termsAccepted"
                             checked={formData.termsAccepted}
-                            onCheckedChange={(checked) => 
+                            onCheckedChange={(checked) =>
                               setFormData({ ...formData, termsAccepted: checked as boolean })
                             }
                             className="mt-0.5"
                           />
                           <Label htmlFor="termsAccepted" className="text-sm cursor-pointer leading-relaxed">
-                            I have read and agree to the <button type="button" onClick={() => setShowTerms(true)} className="text-primary underline hover:text-primary/80">Terms and Conditions</button> for UMS meter registration and installation
+                            I have read and agree to the{" "}
+                            <button
+                              type="button"
+                              onClick={() => setShowTerms(true)}
+                              className="text-primary underline hover:text-primary/80"
+                            >
+                              UMS Customer Agreement
+                            </button>{" "}
+                            for prepaid metering services.
                           </Label>
                         </div>
                       </div>
