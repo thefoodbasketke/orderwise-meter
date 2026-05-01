@@ -86,7 +86,7 @@ export function TaskActionGrid() {
           <h2 className="text-2xl md:text-3xl font-bold mb-2">How Can We Help You Today?</h2>
           <p className="text-sm md:text-base text-muted-foreground">Quick access to our most-used services</p>
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-5 auto-rows-fr">
+        <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 md:gap-4 auto-rows-fr">
           {actions.map((action, i) => {
             const featured = action.featured;
             const Inner = (
