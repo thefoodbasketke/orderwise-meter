@@ -27,6 +27,9 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { z } from "zod";
 
+const CUSTOMER_AGREEMENT_PDF_URL =
+  "https://txwlugpjzcloqvwuvhwd.supabase.co/storage/v1/object/public/site-forms/customer-agreement-prepaid-metering.pdf";
+
 const registerSchema = z.object({
   fullName: z.string().trim().min(1, "Full name is required").max(100),
   phone: z.string().trim().min(10, "Valid phone number required").max(15),
@@ -41,19 +44,51 @@ const registerSchema = z.object({
   termsAccepted: z.literal(true, { errorMap: () => ({ message: "You must accept the terms and conditions" }) }),
 });
 
-const termsAndConditions = [
-  "This is a secondary meter and not a replacement for the main utility meter hence must be supplied from the main meter.",
-  "The customer shall engage a qualified licensed technician to install the UMS meters and is fully responsible for the installation of these meters. A list of licensed electricians can be found on the EPRA website on www.epra.go.ke",
-  "UMS provides a two-year (2-yr) warranty on all meters effective from the date of installation. During this period, the Customer must report any meter malfunctions promptly to UMS for troubleshooting or free replacement. However, if a fault is determined to be caused by customer mishandling or tampering, the Customer shall assume full responsibility for all associated repair or replacement costs.",
-  "For KPLC postpaid accounts, the Customer shall share a digital photo of the current meter readings to ensure the accurate capture of the mother meter's consumption data. Additionally, the Customer agrees to provide a clear digital photo of the installed meters to UMS prior to the commissioning of the system.",
-  "The customer is responsible for any unbilled units registered by the main meter which could arise from connecting directly from main meter bypassing the sub meters.",
-  "Tokens shall be charged at the prevailing tariff approved by EPRA, check www.stimatracker.com",
-  "UMS shall charge a service fee of 10% for token generation and administration on the total tokens unless advised otherwise by the landlord it shall be deducted to customers as meter vends.",
-  "Depending on the agreement with the Landlord for the postpaid account, UMS shall ensure all funds received are paid to the utility provider twice monthly, specifically on the 15th and the last day of every month. Evidence of these payments shall be shared with the Landlord following each transaction.",
-  "For the prepaid account, the Landlord shall provide a one-time initial deposit of KSh 1,500 into their KPLC account to ensure uninterrupted utility service. Thereafter, UMS shall monitor the account and remit collected funds to purchase subsequent tokens once the collected balance reaches a minimum threshold of KSh 1,000. All purchased tokens will be delivered via SMS to the Landlord's registered phone number or their authorized representatives.",
-  "UMS is not liable for any loss, damage, or inconvenience caused by factors beyond its control, including but not limited to natural disasters, power outages/surge, or M-pesa outage.",
-  "Upon meter registration, UMS shall provide the Landlord with access to a dedicated customer portal via https://customer.umskenya.com. Through this portal, the Landlord may view and download all transaction records, including daily, weekly, and monthly statements. Additionally, UMS shall deliver a monthly summary statement via SMS to the Landlord's registered phone number.",
-  "UMS offer metering solution and hence is not a utility provider.",
+const agreementSections: { heading: string; body: string | string[] }[] = [
+  {
+    heading: "Parties",
+    body:
+      "This Agreement is between UMS Kenya Ltd and the undersigned Client (owner/manager of the premises).",
+  },
+  {
+    heading: "1. Purpose of Agreement",
+    body:
+      "UMS Kenya agrees to provide prepaid metering services for electricity, water, and/or gas, and associated services including token vending, collections, reporting, and optional arrears recovery.",
+  },
+  {
+    heading: "2. Definitions",
+    body: [
+      "Client: The person or entity contracting UMS Kenya.",
+      "Occupant: The tenant or end user.",
+      "Meters: Electricity, water, or gas meters supplied/registered by UMS.",
+      "Token: Unique recharge code for utility units.",
+    ],
+  },
+  {
+    heading: "3. Fees & Token Distribution",
+    body: [
+      "Service Fee: A 10% fee is deducted from token purchases to cover admin, SMS, and bank charges. This is charged to the occupant by default unless the Client chooses to bear it.",
+      "Vending: Tokens are purchased via M-PESA Paybill 4130421 using the meter number as the account.",
+      "Remittance: UMS Kenya remits net proceeds to the Client or KPLC monthly.",
+    ],
+  },
+  {
+    heading: "4. Mutual Obligations",
+    body: [
+      "Client: Must bill all utility usage through UMS meters and disclose all fees to tenants/occupants.",
+      "UMS Kenya: Provides secure meters and real-time usage data. A 2-year warranty is provided, excluding damage from mishandling, power surges, or Acts of God.",
+    ],
+  },
+  {
+    heading: "5. Data Protection",
+    body:
+      "UMS Kenya shall protect and secure all personal data submitted by the Client or Occupants. Data will be handled in compliance with the Data Protection Act of Kenya and used solely for providing the services outlined in this agreement.",
+  },
+  {
+    heading: "6. Termination & Disputes",
+    body:
+      "Either party may terminate this agreement with thirty (30) days written notice. Disputes will be resolved through negotiation; if unsuccessful, they will be referred to the Energy and Petroleum Regulatory Authority (EPRA). This agreement is governed by Kenyan law.",
+  },
 ];
 
 const benefits = [
