@@ -85,6 +85,7 @@ interface SiteSetting {
   id: string;
   setting_key: string;
   setting_value: boolean;
+  setting_value_text: string | null;
   description: string | null;
 }
 
