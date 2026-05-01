@@ -314,6 +314,17 @@ export default function ContentManagement() {
     }
   };
 
+  // Update text/numeric setting (debounced via blur or explicit save)
+  const updateTextSetting = async (settingKey: string, value: string) => {
+    try {
+      await supabase.from("site_settings").update({ setting_value_text: value }).eq("setting_key", settingKey);
+      toast({ title: "Saved", description: "Setting updated" });
+      fetchAllContent();
+    } catch (error: any) {
+      toast({ variant: "destructive", title: "Error", description: error.message });
+    }
+  };
+
   // Toggle active status
   const toggleActive = async (table: "site_content" | "projects" | "services" | "testimonials" | "careers", id: string, currentStatus: boolean) => {
     try {
